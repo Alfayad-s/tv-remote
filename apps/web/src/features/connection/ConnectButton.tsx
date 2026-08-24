@@ -28,15 +28,29 @@ export function ConnectButton() {
     return null;
   }
 
+  if (busy) {
+    return (
+      <Button
+        variant="ghost"
+        onClick={() => {
+          haptic();
+          disconnectTv();
+        }}
+      >
+        Cancel
+      </Button>
+    );
+  }
+
   return (
     <Button
-      disabled={!serviceReady || busy || !selectedTvId}
+      disabled={!serviceReady || !selectedTvId}
       onClick={() => {
         haptic([8, 20, 8]);
         connectTv();
       }}
     >
-      {busy ? "Connecting…" : "Connect TV"}
+      Connect TV
     </Button>
   );
 }

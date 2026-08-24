@@ -1,7 +1,7 @@
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileCredentialStore } from "../storage/FileCredentialStore.js";
 import { AndroidTVAdapter } from "../tv/adapters/AndroidTVAdapter.js";
 import { ANDROID_TV_KEY_CODES } from "../tv/androidtv/commands/keyMap.js";
@@ -35,6 +35,10 @@ async function createAdapter(sessions: FakeAndroidTvRemote[] = []): Promise<{
 }
 
 describe("AndroidTVAdapter", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("pairs with a PIN, stores the certificate, and sends HOME", async () => {
     const sessions: FakeAndroidTvRemote[] = [];
     const { adapter, store } = await createAdapter(sessions);
@@ -135,5 +139,14 @@ describe("AndroidTVAdapter", () => {
 
     await adapter.sendCommand("HOME");
     expect(imeEvents).toEqual([true, false]);
+  });
+
+  it("does not hang connecting a LAN IP from a cloud host", async () => {
+    vi.stubEnv("RENDER", "true");
+    const { adapter } = await createAdapter();
+    await expect(adapter.connect({ host: "192.168.29.14" })).rejects.toMatchObject({
+      code: "CONNECTION_FAILED",
+      message: expect.stringContaining("same network"),
+    });
   });
 });

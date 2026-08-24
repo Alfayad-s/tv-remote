@@ -49,7 +49,11 @@ export function ManualIpForm() {
         />
       </label>
       {error ? <p className="text-sm text-rose-200">{error}</p> : null}
-      <Button type="submit" variant="ghost" disabled={serviceStatus !== "open"}>
+      <Button
+        type="submit"
+        variant="ghost"
+        disabled={serviceStatus !== "open" || tvState === "CONNECTING" || tvState === "RECONNECTING"}
+      >
         Connect with IP
       </Button>
     </form>

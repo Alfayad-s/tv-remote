@@ -119,6 +119,8 @@ export function RemoteScreen() {
                 : panel === "keyboard"
                   ? "Type on the phone. Text goes to the TV automatically."
                   : "Hold arrows or volume to repeat."
+            : tvState === "CONNECTING" || tvState === "RECONNECTING"
+              ? "The TV and the Node service must be on the same Wi-Fi. A cloud host cannot reach 192.168.x.x."
               : "Connect the TV to use the remote."}
       </p>
     </main>

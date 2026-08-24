@@ -18,8 +18,11 @@ import type {
   AndroidTvRemoteSession,
 } from "../androidtv/protocol/client.js";
 import { createKudAndroidTvRemote } from "../androidtv/protocol/kudRemote.js";
+import { cloudLanConnectError, isCloudRuntime, isPrivateIpv4 } from "../../net/lan.js";
+import { probeTcp } from "../../net/tcpProbe.js";
 
 const DEFAULT_PAIRING_TIMEOUT_MS = 90_000;
+const DEFAULT_CONNECT_PROBE_MS = 8_000;
 const DEFAULT_CLIENT_NAME = "iFFALCON Remote";
 
 export interface AndroidTVAdapterOptions {
@@ -69,6 +72,7 @@ export class AndroidTVAdapter implements TVAdapter {
   private readonly pairingTimeoutMs: number;
   private readonly clientName: string;
   private readonly pairingPort: number;
+  private readonly probeNetwork: boolean;
   private readonly listeners = new Set<TVAdapterListener>();
   private session: AndroidTvRemoteSession | null = null;
   private device: TVDevice | null = null;
@@ -82,6 +86,7 @@ export class AndroidTVAdapter implements TVAdapter {
     this.pairingTimeoutMs = options.pairingTimeoutMs ?? DEFAULT_PAIRING_TIMEOUT_MS;
     this.clientName = options.clientName ?? DEFAULT_CLIENT_NAME;
     this.pairingPort = options.pairingPort ?? DEFAULT_PAIRING_PORT;
+    this.probeNetwork = options.createRemote === undefined;
   }
 
   subscribe(listener: TVAdapterListener): () => void {
@@ -98,6 +103,14 @@ export class AndroidTVAdapter implements TVAdapter {
         "CONNECTION_FAILED",
         "A LAN TV address is required for Android TV pairing.",
       );
+    }
+
+    if (isPrivateIpv4(host) && isCloudRuntime()) {
+      throw cloudLanConnectError(host);
+    }
+
+    if (this.probeNetwork) {
+      await probeTcp(host, this.pairingPort, DEFAULT_CONNECT_PROBE_MS);
     }
 
     const generation = ++this.connectGeneration;
