@@ -1,0 +1,15 @@
+node_modules
+dist
+dev-dist
+coverage
+.env
+.env.local
+.env.*.local
+data/credentials/*
+!data/credentials/.gitkeep
+apps/server/data/
+*.log
+.DS_Store
+.vite
+*.tsbuildinfo
+.eslintcache

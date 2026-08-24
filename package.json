@@ -1,0 +1,40 @@
+{
+  "name": "tv-remote",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal PWA remote control for iFFALCON Android TV",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c cyan,magenta \"npm run dev -w @tv-remote/server\" \"npm run dev -w @tv-remote/web\"",
+    "dev:server": "npm run dev -w @tv-remote/server",
+    "dev:web": "npm run dev -w @tv-remote/web",
+    "build": "npm run build -w @tv-remote/shared && npm run build -w @tv-remote/server && npm run build -w @tv-remote/web",
+    "test": "npm run test -w @tv-remote/shared && npm run test -w @tv-remote/server && npm run test -w @tv-remote/web",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck -w @tv-remote/shared && npm run typecheck -w @tv-remote/server && npm run typecheck -w @tv-remote/web",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.40.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  }
+}

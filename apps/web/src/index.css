@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "SF Pro Display", "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #071018;
+  --color-ink-soft: #0e1a27;
+  --color-glass: rgb(18 32 48 / 0.72);
+  --color-line: rgb(148 197 255 / 0.16);
+  --color-accent: #5eead4;
+  --color-accent-strong: #2dd4bf;
+  --color-warn: #fbbf24;
+  --color-danger: #fb7185;
+  --color-ok: #4ade80;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgb(45 212 191 / 0.16), transparent 55%),
+    radial-gradient(900px 500px at 110% 10%, rgb(56 189 248 / 0.12), transparent 50%),
+    var(--color-ink);
+  color: #e8f4ff;
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+}
