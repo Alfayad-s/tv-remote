@@ -8,6 +8,7 @@ describe("loadConfig", () => {
       PORT: "8787",
       LOG_LEVEL: "debug",
       TV_ADAPTER: "mock",
+      WEB_DIST: "false",
     });
 
     expect(config.host).toBe("127.0.0.1");
@@ -19,6 +20,7 @@ describe("loadConfig", () => {
     expect(config.discoveryTimeoutMs).toBe(3000);
     expect(config.pairingTimeoutMs).toBe(90_000);
     expect(config.pairingClientName).toBe("iFFALCON Remote");
+    expect(config.webDist).toBeNull();
   });
 
   it("falls back when values are unknown", () => {

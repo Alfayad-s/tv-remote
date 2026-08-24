@@ -1,3 +1,4 @@
+import { isTvAppId } from "./apps.js";
 import { isRemoteCommand } from "./commands.js";
 import { isAppErrorCode } from "./errors.js";
 import { isConnectionState, TV_EVENTS, type TVEvent } from "./events.js";
@@ -181,6 +182,12 @@ export function validateClientMessage(raw: unknown): ValidationResult<ClientMess
         return fail("INVALID_MESSAGE", "SEND_TEXT requires 1–256 characters.");
       }
       return { ok: true, value: { id, type, payload: { text } } };
+    }
+    case "LAUNCH_APP": {
+      if (!isTvAppId(payload["app"])) {
+        return fail("INVALID_MESSAGE", "LAUNCH_APP requires a supported app.");
+      }
+      return { ok: true, value: { id, type, payload: { app: payload["app"] } } };
     }
     case "SUBMIT_PIN": {
       if (typeof payload["pin"] !== "string") {

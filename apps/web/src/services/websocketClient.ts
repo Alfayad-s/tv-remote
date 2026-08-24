@@ -1,4 +1,4 @@
-import type { ClientMessage, RemoteCommand, ServerMessage } from "@tv-remote/shared";
+import type { ClientMessage, RemoteCommand, ServerMessage, TvAppId } from "@tv-remote/shared";
 import { validateServerMessage } from "@tv-remote/shared";
 import { createReconnectScheduler } from "../utils/reconnect.js";
 import { createMessageId, resolveWebSocketUrl } from "../utils/websocketUrl.js";
@@ -69,6 +69,10 @@ export class WebSocketClient {
 
   sendText(text: string): boolean {
     return this.send({ type: "SEND_TEXT", payload: { text } });
+  }
+
+  launchApp(app: TvAppId): boolean {
+    return this.send({ type: "LAUNCH_APP", payload: { app } });
   }
 
   submitPin(pin: string): boolean {

@@ -218,6 +218,13 @@ export class AndroidTVAdapter implements TVAdapter {
     this.session.sendText(text);
   }
 
+  async launchApp(appLink: string): Promise<void> {
+    if (!this.connected || !this.session) {
+      throw new AppError("CONNECTION_FAILED", "Connect to the TV before launching an app.");
+    }
+    this.session.sendAppLink(appLink);
+  }
+
   async submitPin(pin: string): Promise<void> {
     if (!this.session || !this.pairing) {
       throw new AppError("PAIRING_REQUIRED", "Pairing is not in progress.");

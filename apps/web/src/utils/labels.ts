@@ -19,7 +19,20 @@ export function tvStateLabel(state: ConnectionState): string {
   }
 }
 
-export function serviceStatusLabel(status: ServiceStatus): string {
+export function serviceStatusLabel(
+  status: ServiceStatus,
+  runtime: "web" | "native" = "web",
+): string {
+  if (runtime === "native") {
+    switch (status) {
+      case "connecting":
+        return "Starting phone remote…";
+      case "open":
+        return "Phone ready — laptop not required";
+      case "closed":
+        return "Native remote unavailable";
+    }
+  }
   switch (status) {
     case "connecting":
       return "Connecting to local service…";

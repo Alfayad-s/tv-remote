@@ -66,6 +66,14 @@ export class MockTVAdapter implements TVAdapter {
     void text;
   }
 
+  async launchApp(appLink: string): Promise<void> {
+    if (!this.connected) {
+      throw new AppError("CONNECTION_FAILED", "Mock TV is not connected.");
+    }
+    await delay(this.latencyMs);
+    void appLink;
+  }
+
   getDevice(): TVDevice | null {
     return this.device;
   }

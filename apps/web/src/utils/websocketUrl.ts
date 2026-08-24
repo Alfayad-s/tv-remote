@@ -1,12 +1,43 @@
-export function resolveWebSocketUrl(): string {
-  const configured = import.meta.env.VITE_WS_URL;
+import { isPrivateHostname } from "./homeNetwork.js";
+
+export interface PageLocation {
+  protocol: string;
+  hostname: string;
+  port: string;
+}
+
+export interface WebSocketEnv {
+  VITE_WS_URL?: string;
+  VITE_WS_PORT?: string;
+}
+
+const DEV_WEB_PORTS = new Set(["5173", "4173"]);
+
+export function resolveWebSocketUrl(
+  location: PageLocation = window.location,
+  env: WebSocketEnv = import.meta.env,
+): string {
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+
+  if (isPrivateHostname(location.hostname)) {
+    if (DEV_WEB_PORTS.has(location.port)) {
+      return `${protocol}//${location.hostname}:${location.port}/ws`;
+    }
+    const port = location.port || env.VITE_WS_PORT || "8787";
+    return `${protocol}//${location.hostname}:${port}/ws`;
+  }
+
+  const configured = env.VITE_WS_URL;
   if (configured && configured.length > 0) {
     return configured;
   }
 
-  const port = import.meta.env.VITE_WS_PORT ?? "8787";
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.hostname}:${port}`;
+  if (location.protocol === "https:") {
+    return `wss://${location.hostname}/ws`;
+  }
+
+  const port = location.port || env.VITE_WS_PORT || "8787";
+  return `${protocol}//${location.hostname}:${port}/ws`;
 }
 
 export function createMessageId(): string {

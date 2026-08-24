@@ -1,4 +1,4 @@
-export const KEYBOARD_FLUSH_MS = 180;
+export const KEYBOARD_COMPOSING_FLUSH_MS = 420;
 
 export interface TypedTextDelta {
   backspaces: number;

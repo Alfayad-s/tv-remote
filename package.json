@@ -13,13 +13,17 @@
     "dev:server": "npm run dev -w @tv-remote/server",
     "dev:web": "npm run dev -w @tv-remote/web",
     "build": "npm run build -w @tv-remote/shared && npm run build -w @tv-remote/server && npm run build -w @tv-remote/web",
+    "start": "npm run start -w @tv-remote/server",
     "test": "npm run test -w @tv-remote/shared && npm run test -w @tv-remote/server && npm run test -w @tv-remote/web",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "npm run typecheck -w @tv-remote/shared && npm run typecheck -w @tv-remote/server && npm run typecheck -w @tv-remote/web",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "android": "npm run cap:sync -w @tv-remote/web && npm run cap:open -w @tv-remote/web",
+    "android:sync": "npm run cap:sync -w @tv-remote/web",
+    "apk:web": "node scripts/copy-apk-to-web.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

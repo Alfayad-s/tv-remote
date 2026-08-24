@@ -94,6 +94,10 @@ async function dispatch(
       await deps.tvManager.sendText(message.payload.text);
       return [];
     }
+    case "LAUNCH_APP": {
+      await deps.tvManager.launchApp(message.payload.app);
+      return [];
+    }
     case "SUBMIT_PIN": {
       deps.logger.info("Pairing PIN submitted");
       await deps.tvManager.submitPin(message.payload.pin);

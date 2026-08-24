@@ -1,4 +1,4 @@
-import type { ConnectionState, RemoteCommand, TVDevice } from "@tv-remote/shared";
+import type { ConnectionState, RemoteCommand, TvAppId, TVDevice } from "@tv-remote/shared";
 import { createContext } from "react";
 import type { ServiceStatus } from "../services/websocketClient.js";
 
@@ -24,6 +24,7 @@ export interface ConnectionStore {
   disconnectTv: () => void;
   sendCommand: (command: RemoteCommand) => void;
   sendText: (text: string) => boolean;
+  launchApp: (app: TvAppId) => boolean;
   submitPin: (pin: string) => boolean;
   discoverTvs: () => void;
   selectTv: (id: string) => void;

@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 import type { LogLevel } from "../logger.js";
 
 export type TvAdapterName = "mock" | "androidtv";
@@ -15,6 +17,7 @@ export interface ServerConfig {
   pairingClientName: string;
   credentialsDir: string;
   allowedOrigins: string[];
+  webDist: string | null;
 }
 
 const LOG_LEVELS: readonly LogLevel[] = ["debug", "info", "warn", "error"];
@@ -76,6 +79,33 @@ function readIncludeMock(env: NodeJS.ProcessEnv): boolean {
   return env["NODE_ENV"] !== "production";
 }
 
+export function resolveWebDist(
+  env: NodeJS.ProcessEnv = process.env,
+  cwd = process.cwd(),
+): string | null {
+  const raw = env["WEB_DIST"]?.trim();
+  if (raw === "false" || raw === "0" || raw === "off") {
+    return null;
+  }
+
+  const candidates =
+    raw && raw.length > 0
+      ? [resolve(cwd, raw)]
+      : [
+          resolve(cwd, "apps/web/dist"),
+          resolve(cwd, "../web/dist"),
+          resolve(cwd, "../../apps/web/dist"),
+        ];
+
+  for (const dir of candidates) {
+    if (existsSync(join(dir, "index.html"))) {
+      return dir;
+    }
+  }
+
+  return null;
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const allowedOrigins = (env["WS_ALLOWED_ORIGINS"] ?? "")
     .split(",")
@@ -96,5 +126,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     pairingClientName: env["PAIRING_CLIENT_NAME"]?.trim() || "iFFALCON Remote",
     credentialsDir: env["CREDENTIALS_DIR"] ?? "./data/credentials",
     allowedOrigins,
+    webDist: resolveWebDist(env),
   };
 }

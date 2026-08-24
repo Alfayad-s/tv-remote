@@ -30,6 +30,7 @@ function renderRemote(overrides: Partial<ConnectionStore> = {}) {
     disconnectTv: vi.fn(),
     sendCommand: vi.fn(),
     sendText: vi.fn(),
+    launchApp: vi.fn(),
     submitPin: vi.fn(),
     discoverTvs: vi.fn(),
     selectTv: vi.fn(),
@@ -49,6 +50,10 @@ describe("RemoteScreen", () => {
     expect(screen.getByText("iFFALCON Remote")).toBeInTheDocument();
     expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Not connected");
     expect(screen.getByRole("button", { name: "Connect TV" })).toBeEnabled();
+    expect(screen.getByRole("link", { name: "Download app" })).toHaveAttribute(
+      "href",
+      "/downloads/iffalcon-remote.apk",
+    );
     expect(screen.queryByRole("button", { name: "Home" })).not.toBeInTheDocument();
   });
 
@@ -76,23 +81,47 @@ describe("RemoteScreen", () => {
     });
 
     expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Connected");
+    expect(screen.queryByText("iFFALCON Remote")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Disconnect" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Home" }));
     expect(value.sendCommand).toHaveBeenCalledWith("HOME");
+    expect(screen.queryByRole("button", { name: /^Keyboard$/ })).not.toBeInTheDocument();
   });
 
-  it("opens the keyboard panel while connected", async () => {
+  it("opens the remote as soon as a TV connection starts", () => {
+    renderRemote({
+      tvState: "CONNECTING",
+      tv: { ...mockTv, connected: false },
+    });
+
+    expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(screen.queryByText("iFFALCON Remote")).not.toBeInTheDocument();
+    expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Connecting");
+  });
+
+  it("opens a typing preview on the same remote page", async () => {
     const user = userEvent.setup();
     const { value } = renderRemote({
       tvState: "CONNECTED",
       tv: { ...mockTv, connected: true },
     });
 
-    await user.click(screen.getByRole("button", { name: "Keyboard" }));
-    await user.type(screen.getByPlaceholderText("Search or type…"), "hello");
+    await user.click(screen.getByRole("button", { name: "Open keyboard" }));
+    expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Typing preview" })).toBeVisible();
+    await user.type(screen.getByPlaceholderText("Type here…"), "hello");
     await waitFor(() => {
-      expect(value.sendText).toHaveBeenCalledWith("hello");
+      expect(value.sendText).toHaveBeenCalledTimes(5);
     });
+    expect(value.sendText).toHaveBeenNthCalledWith(1, "h");
+    expect(value.sendText).toHaveBeenNthCalledWith(5, "o");
     expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close keyboard" }));
+    expect(screen.queryByRole("dialog", { name: "Typing preview" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
   });
 
   it("opens the touchpad panel while connected", async () => {
@@ -104,7 +133,12 @@ describe("RemoteScreen", () => {
 
     await user.click(screen.getByRole("button", { name: "Touchpad" }));
     expect(screen.getByTestId("touchpad")).toBeInTheDocument();
-    expect(screen.getByText(/Swipe to move around the TV/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open keyboard" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Open keyboard" }));
+    expect(screen.getByRole("dialog", { name: "Typing preview" })).toBeVisible();
+    expect(screen.getByTestId("touchpad")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Touchpad" })).toBeInTheDocument();
   });
 
   it("opens the keyboard when the TV shows a text field", async () => {
@@ -115,9 +149,10 @@ describe("RemoteScreen", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("Search or type…")).toBeInTheDocument();
+      expect(screen.getByRole("dialog", { name: "Typing preview" })).toBeVisible();
     });
-    expect(screen.getByText(/The TV is waiting for text/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
   });
 
   it("shows the pairing form while waiting for a PIN", () => {

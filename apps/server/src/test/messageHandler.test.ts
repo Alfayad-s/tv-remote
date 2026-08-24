@@ -94,4 +94,16 @@ describe("handleClientMessage", () => {
       payload: { code: "INVALID_MESSAGE" },
     });
   });
+
+  it("launches a supported app after connect", async () => {
+    const handlerDeps = deps();
+
+    await handleClientMessage({ id: "c1", type: "CONNECT_TV", payload: {} }, handlerDeps);
+    const replies = await handleClientMessage(
+      { id: "a1", type: "LAUNCH_APP", payload: { app: "youtube" } },
+      handlerDeps,
+    );
+
+    expect(replies).toEqual([]);
+  });
 });

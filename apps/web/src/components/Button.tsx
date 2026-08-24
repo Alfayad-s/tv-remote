@@ -3,6 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   variant?: "primary" | "ghost" | "danger";
+  size?: "md" | "sm";
 }
 
 const VARIANT_CLASS: Record<NonNullable<ButtonProps["variant"]>, string> = {
@@ -12,9 +13,15 @@ const VARIANT_CLASS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   danger: "bg-danger/90 text-ink hover:brightness-110",
 };
 
+const SIZE_CLASS: Record<NonNullable<ButtonProps["size"]>, string> = {
+  md: "min-h-14 w-full rounded-2xl px-5 text-base",
+  sm: "min-h-9 w-auto shrink-0 rounded-full px-4 text-sm",
+};
+
 export function Button({
   children,
   variant = "primary",
+  size = "md",
   className = "",
   type = "button",
   ...props
@@ -22,7 +29,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`min-h-14 w-full rounded-2xl px-5 text-base font-semibold tracking-wide transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${VARIANT_CLASS[variant]} ${className}`}
+      className={`font-semibold tracking-wide transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${SIZE_CLASS[size]} ${VARIANT_CLASS[variant]} ${className}`}
       {...props}
     >
       {children}

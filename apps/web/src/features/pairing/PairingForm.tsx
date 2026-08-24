@@ -45,7 +45,7 @@ export function PairingForm() {
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-3xl border border-accent/30 bg-accent/10 p-5"
+      className="flex flex-col gap-3 rounded-3xl border border-accent/30 bg-accent/10 p-[clamp(0.9rem,3vw,1.25rem)]"
       onSubmit={onSubmit}
     >
       <div>

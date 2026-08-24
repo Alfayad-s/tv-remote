@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { RemotePad } from "./RemotePad.js";
 import { ConnectionContext, type ConnectionStore } from "../../store/connectionContext.js";
 
-function renderPad(disabled = false) {
+function renderPad(disabled = false, onOpenKeyboard?: () => void) {
   const value: ConnectionStore = {
     serviceStatus: "open",
     tvState: "CONNECTED",
@@ -20,6 +20,7 @@ function renderPad(disabled = false) {
     disconnectTv: vi.fn(),
     sendCommand: vi.fn(),
     sendText: vi.fn(),
+    launchApp: vi.fn(),
     submitPin: vi.fn(),
     discoverTvs: vi.fn(),
     selectTv: vi.fn(),
@@ -29,7 +30,16 @@ function renderPad(disabled = false) {
     return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;
   }
 
-  return { ...render(<RemotePad disabled={disabled} />, { wrapper: Wrapper }), value };
+  return {
+    ...render(
+      <RemotePad
+        disabled={disabled}
+        {...(onOpenKeyboard === undefined ? {} : { onOpenKeyboard })}
+      />,
+      { wrapper: Wrapper },
+    ),
+    value,
+  };
 }
 
 describe("RemotePad", () => {
@@ -66,9 +76,45 @@ describe("RemotePad", () => {
     expect(value.sendCommand).not.toHaveBeenCalled();
   });
 
-  it("includes a touchpad at the bottom of the remote", () => {
-    renderPad();
-    expect(screen.getByTestId("touchpad")).toBeInTheDocument();
-    expect(screen.getByLabelText("Remote touchpad")).toBeInTheDocument();
+  it("sends channel commands from the channel rocker", async () => {
+    const user = userEvent.setup();
+    const { value } = renderPad();
+
+    await user.click(screen.getByRole("button", { name: "Channel up" }));
+    await user.click(screen.getByRole("button", { name: "Channel down" }));
+
+    expect(value.sendCommand).toHaveBeenCalledWith("CHANNEL_UP");
+    expect(value.sendCommand).toHaveBeenCalledWith("CHANNEL_DOWN");
+  });
+
+  it("opens YouTube, Prime Video, and Hotstar", async () => {
+    const user = userEvent.setup();
+    const { value } = renderPad();
+
+    await user.click(screen.getByRole("button", { name: "YouTube" }));
+    await user.click(screen.getByRole("button", { name: "Prime Video" }));
+    await user.click(screen.getByRole("button", { name: "Hotstar" }));
+
+    expect(value.launchApp).toHaveBeenCalledWith("youtube");
+    expect(value.launchApp).toHaveBeenCalledWith("prime-video");
+    expect(value.launchApp).toHaveBeenCalledWith("hotstar");
+  });
+
+  it("does not launch apps while disabled", async () => {
+    const user = userEvent.setup();
+    const { value } = renderPad(true);
+
+    await user.click(screen.getByRole("button", { name: "YouTube" }));
+    expect(value.launchApp).not.toHaveBeenCalled();
+  });
+
+  it("asks to open the keyboard without sending a TV command", async () => {
+    const user = userEvent.setup();
+    const onOpenKeyboard = vi.fn();
+    const { value } = renderPad(false, onOpenKeyboard);
+
+    await user.click(screen.getByRole("button", { name: "Open keyboard" }));
+    expect(onOpenKeyboard).toHaveBeenCalledTimes(1);
+    expect(value.sendCommand).not.toHaveBeenCalled();
   });
 });

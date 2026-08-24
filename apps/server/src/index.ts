@@ -6,7 +6,7 @@ import { createLogger } from "./logger.js";
 import { FileCredentialStore } from "./storage/FileCredentialStore.js";
 import { createAdapter } from "./tv/adapters/createAdapter.js";
 import { TVManager } from "./tv/TVManager.js";
-import { createWebSocketServer } from "./websocket/server.js";
+import { createGateway } from "./websocket/server.js";
 
 function applyEnvFile(filePath: string): void {
   if (!existsSync(filePath)) {
@@ -51,7 +51,7 @@ const discovery = createDiscoveryService({
   logger,
 });
 
-const wss = createWebSocketServer({
+const gateway = createGateway({
   config,
   logger,
   tvManager,
@@ -61,7 +61,7 @@ const wss = createWebSocketServer({
 const shutdown = (): void => {
   logger.info("Shutting down");
   discovery.stop?.();
-  wss.close();
+  gateway.httpServer.close();
   void tvManager.disconnect();
 };
 

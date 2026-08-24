@@ -116,6 +116,27 @@ describe("validateClientMessage", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("accepts a supported app launch", () => {
+    const result = validateClientMessage({
+      id: "a1",
+      type: "LAUNCH_APP",
+      payload: { app: "youtube" },
+    });
+    expect(result).toEqual({
+      ok: true,
+      value: { id: "a1", type: "LAUNCH_APP", payload: { app: "youtube" } },
+    });
+  });
+
+  it("rejects an unknown app launch", () => {
+    const result = validateClientMessage({
+      id: "a1",
+      type: "LAUNCH_APP",
+      payload: { app: "netflix" },
+    });
+    expect(result.ok).toBe(false);
+  });
+
   it("rejects a non-hex pairing PIN", () => {
     const result = validateClientMessage({
       id: "p1",

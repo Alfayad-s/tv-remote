@@ -7,7 +7,7 @@ export function ConnectionStatus() {
   const name = tv?.name ?? "iFFALCON TV";
 
   return (
-    <section className="rounded-3xl border border-line bg-glass p-5 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.08)] backdrop-blur-xl">
+    <section className="rounded-3xl border border-line bg-glass p-[clamp(0.9rem,3vw,1.25rem)] shadow-[inset_0_1px_0_rgb(255_255_255_/_0.08)] backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-cyan-200/60">Television</p>

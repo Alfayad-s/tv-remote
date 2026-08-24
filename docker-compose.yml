@@ -1,0 +1,21 @@
+services:
+  tv-remote:
+    build: .
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "8787"
+      TV_ADAPTER: androidtv
+      DISCOVERY_MODE: mdns
+      INCLUDE_MOCK: "false"
+      CREDENTIALS_DIR: /data/credentials
+    volumes:
+      - tv-remote-credentials:/data/credentials
+    # Host networking is required so mDNS and 192.168.x.x reach the TV.
+    # Use this compose file on a Raspberry Pi or other always-on Linux box,
+    # not on Docker Desktop for Mac.
+    network_mode: host
+
+volumes:
+  tv-remote-credentials:

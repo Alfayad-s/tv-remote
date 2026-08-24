@@ -1,3 +1,4 @@
+import type { TvAppId } from "./apps.js";
 import type { RemoteCommand } from "./commands.js";
 import type { AppErrorCode } from "./errors.js";
 import type { ConnectionState, TVEvent } from "./events.js";
@@ -9,6 +10,7 @@ export const CLIENT_MESSAGE_TYPES = [
   "DISCOVER_TVS",
   "REMOTE_COMMAND",
   "SEND_TEXT",
+  "LAUNCH_APP",
   "SUBMIT_PIN",
   "PING",
 ] as const;
@@ -67,6 +69,13 @@ export type SendTextMessage = MessageEnvelope<
   }
 >;
 
+export type LaunchAppMessage = MessageEnvelope<
+  "LAUNCH_APP",
+  {
+    app: TvAppId;
+  }
+>;
+
 export type PingMessage = MessageEnvelope<
   "PING",
   {
@@ -80,6 +89,7 @@ export type ClientMessage =
   | DiscoverTvsMessage
   | RemoteCommandMessage
   | SendTextMessage
+  | LaunchAppMessage
   | SubmitPinMessage
   | PingMessage;
 

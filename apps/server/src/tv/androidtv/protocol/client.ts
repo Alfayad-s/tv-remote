@@ -8,6 +8,7 @@ export interface AndroidTvRemoteSession {
   sendCode(code: string): boolean;
   sendKey(keyCode: number): void;
   sendText(text: string): void;
+  sendAppLink(appLink: string): void;
   getCertificate(): AndroidTvCertificate;
   stop(): void;
   on(event: "secret" | "ready" | "unpaired", listener: () => void): void;

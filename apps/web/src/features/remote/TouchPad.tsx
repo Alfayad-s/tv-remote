@@ -3,7 +3,7 @@ import type { RemoteCommand } from "@tv-remote/shared";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useConnection } from "../../hooks/useConnection.js";
 import { RemoteKey } from "./RemoteKey.js";
-import { IconBack, IconHome } from "./remoteIcons.js";
+import { IconBack, IconKeyboard } from "./remoteIcons.js";
 import {
   applyPointerDelta,
   createSwipeAccumulator,
@@ -37,9 +37,13 @@ const SENSITIVITY_OPTIONS: { id: TouchpadSensitivity; label: string }[] = [
 export function TouchPad({
   disabled,
   compact = false,
+  fill = false,
+  onOpenKeyboard,
 }: {
   disabled: boolean;
   compact?: boolean;
+  fill?: boolean;
+  onOpenKeyboard?: () => void;
 }) {
   const { sendCommand } = useConnection();
   const haptic = useHaptics();
@@ -167,14 +171,10 @@ export function TouchPad({
   );
 
   return (
-    <section className="flex flex-col gap-4" aria-label={compact ? "Remote touchpad" : "Touchpad"}>
-      {compact ? null : (
-        <p className="text-sm leading-6 text-cyan-100/65">
-          Swipe to move around the TV, tap to select. This sends D-pad keys — Android TV Remote has
-          no free mouse cursor.
-        </p>
-      )}
-
+    <section
+      className={`flex min-h-0 flex-col gap-[clamp(0.5rem,1.4dvh,0.75rem)] ${fill ? "flex-1" : ""}`}
+      aria-label={compact ? "Remote touchpad" : "Touchpad"}
+    >
       <div
         role="application"
         aria-label="TV touchpad"
@@ -192,7 +192,7 @@ export function TouchPad({
           event.preventDefault();
         }}
         className={`relative isolate touch-none overflow-hidden rounded-[1.75rem] border border-line bg-ink-soft/90 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.06)] select-none ${
-          compact ? "min-h-[11rem]" : "min-h-[18.5rem]"
+          compact ? "min-h-[11rem]" : fill ? "min-h-0 flex-1" : "min-h-[18.5rem]"
         } ${disabled ? "cursor-not-allowed opacity-40" : "cursor-none"}`}
       >
         <div
@@ -224,14 +224,14 @@ export function TouchPad({
 
       <div className="flex items-center justify-between gap-3">
         <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-100/40">Sensitivity</p>
-        <div className="grid grid-cols-3 gap-1 rounded-xl border border-line bg-ink-soft/70 p-1">
+        <div className="grid grid-cols-3 gap-1 rounded-full border border-line bg-ink-soft/70 p-1">
           {SENSITIVITY_OPTIONS.map((option) => (
             <button
               key={option.id}
               type="button"
               aria-pressed={sensitivity === option.id}
               aria-label={`${option.label} sensitivity`}
-              className={`min-h-9 rounded-lg px-3 text-xs font-semibold ${
+              className={`min-h-9 rounded-full px-3 text-xs font-semibold ${
                 sensitivity === option.id ? "bg-accent-strong text-ink" : "text-cyan-100/70"
               }`}
               onClick={() => {
@@ -246,16 +246,30 @@ export function TouchPad({
 
       {compact ? null : (
         <div className="grid grid-cols-2 gap-3">
-          <RemoteKey label="Back" disabled={disabled} onPress={press("BACK")}>
+          <RemoteKey
+            label="Back"
+            disabled={disabled}
+            flush
+            className="remote-key-h rounded-full"
+            onPress={press("BACK")}
+          >
             <span className="flex items-center gap-2">
               <IconBack />
               Back
             </span>
           </RemoteKey>
-          <RemoteKey label="Home" disabled={disabled} onPress={press("HOME")}>
+          <RemoteKey
+            label="Open keyboard"
+            disabled={disabled}
+            flush
+            className="remote-key-h rounded-full"
+            onPress={() => {
+              onOpenKeyboard?.();
+            }}
+          >
             <span className="flex items-center gap-2">
-              <IconHome />
-              Home
+              <IconKeyboard />
+              Keyboard
             </span>
           </RemoteKey>
         </div>

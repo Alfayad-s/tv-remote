@@ -21,6 +21,7 @@ export class FakeAndroidTvRemote extends EventEmitter implements AndroidTvRemote
   readonly host: string;
   lastKeyCode: number | undefined;
   lastText: string | undefined;
+  lastAppLink: string | undefined;
   private readonly hasCert: boolean;
   private started = false;
   private resolveStart: ((value: boolean) => void) | undefined;
@@ -70,6 +71,10 @@ export class FakeAndroidTvRemote extends EventEmitter implements AndroidTvRemote
 
   sendText(text: string): void {
     this.lastText = text;
+  }
+
+  sendAppLink(appLink: string): void {
+    this.lastAppLink = appLink;
   }
 
   emitCurrentApp(appPackage = "com.google.android.youtube.tv"): void {

@@ -69,8 +69,8 @@ PWA → CONNECT_TV <LAN IP> → AndroidTVAdapter → TLS 6467 PIN → TLS 6466 k
 1. Find the computer IP, e.g. `192.168.1.20`.
 2. Keep `HOST=0.0.0.0` so the service accepts LAN clients.
 3. Open `http://192.168.1.20:5173` on the phone.
-4. The WebSocket URL becomes `ws://192.168.1.20:8787` from the page hostname.
-5. Allow Node through the OS firewall for port `8787` if needed.
+4. The page stays on port 5173 and Vite proxies `/ws` to the Node service on `8787`.
+5. Allow Node through the OS firewall for ports `5173` and `8787` if needed.
 
 Do not expose these ports on the public internet.
 

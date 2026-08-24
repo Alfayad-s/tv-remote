@@ -43,6 +43,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
         navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/downloads\//],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === "navigate",
@@ -68,9 +69,21 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    proxy: {
+      "/ws": {
+        target: "ws://127.0.0.1:8787",
+        ws: true,
+      },
+    },
   },
   preview: {
     host: true,
     port: 4173,
+    proxy: {
+      "/ws": {
+        target: "ws://127.0.0.1:8787",
+        ws: true,
+      },
+    },
   },
 });

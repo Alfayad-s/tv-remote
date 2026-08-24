@@ -20,6 +20,7 @@ function renderPad(disabled = false) {
     disconnectTv: vi.fn(),
     sendCommand: vi.fn(),
     sendText: vi.fn(),
+    launchApp: vi.fn(),
     submitPin: vi.fn(),
     discoverTvs: vi.fn(),
     selectTv: vi.fn(),
@@ -127,5 +128,39 @@ describe("TouchPad", () => {
       "aria-pressed",
       "true",
     );
+  });
+
+  it("sends BACK from the bottom row and can open the keyboard", () => {
+    const onOpenKeyboard = vi.fn();
+    const value: ConnectionStore = {
+      serviceStatus: "open",
+      tvState: "CONNECTED",
+      tv: null,
+      devices: [],
+      selectedTvId: null,
+      discoveryStatus: "done",
+      lastError: null,
+      lastCommand: null,
+      imeActive: false,
+      connectTv: vi.fn(),
+      disconnectTv: vi.fn(),
+      sendCommand: vi.fn(),
+      sendText: vi.fn(),
+      launchApp: vi.fn(),
+      submitPin: vi.fn(),
+      discoverTvs: vi.fn(),
+      selectTv: vi.fn(),
+    };
+
+    function Wrapper({ children }: { children: ReactNode }) {
+      return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;
+    }
+
+    render(<TouchPad disabled={false} onOpenKeyboard={onOpenKeyboard} />, { wrapper: Wrapper });
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Back" }));
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Open keyboard" }));
+
+    expect(value.sendCommand).toHaveBeenCalledWith("BACK");
+    expect(onOpenKeyboard).toHaveBeenCalledTimes(1);
   });
 });

@@ -19,6 +19,7 @@ export interface TVAdapter {
   disconnect(): Promise<void>;
   sendCommand(command: RemoteCommand): Promise<void>;
   sendText(text: string): Promise<void>;
+  launchApp(appLink: string): Promise<void>;
   getDevice(): TVDevice | null;
   isConnected(): boolean;
   submitPin?(pin: string): Promise<void>;

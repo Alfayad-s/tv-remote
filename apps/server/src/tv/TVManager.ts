@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
-import type { ConnectionState, RemoteCommand, ServerMessage, TVDevice } from "@tv-remote/shared";
+import type {
+  ConnectionState,
+  RemoteCommand,
+  ServerMessage,
+  TvAppId,
+  TVDevice,
+} from "@tv-remote/shared";
+import { tvAppLink } from "@tv-remote/shared";
 import type { Logger } from "../logger.js";
 import { AppError, isCancelledError, toAppError } from "../types/errors.js";
 import type { ConnectOptions, TVAdapter } from "./TVAdapter.js";
@@ -166,6 +173,23 @@ export class TVManager {
       },
     });
     this.logger.debug("Sent text to TV", { length: text.length, adapter: this.adapter.name });
+  }
+
+  async launchApp(app: TvAppId): Promise<void> {
+    if (!this.adapter.isConnected()) {
+      throw new AppError("CONNECTION_FAILED", "Connect to the TV before launching an app.");
+    }
+
+    await this.adapter.launchApp(tvAppLink(app));
+    this.emit({
+      id: randomUUID(),
+      type: "TV_EVENT",
+      payload: {
+        event: "COMMAND_SENT",
+        tv: this.adapter.getDevice(),
+      },
+    });
+    this.logger.debug("Launched TV app", { app, adapter: this.adapter.name });
   }
 
   async submitPin(pin: string): Promise<void> {

@@ -92,9 +92,10 @@ npm run dev:server
 | `PAIRING_TIMEOUT_MS`   | server | `90000`                            | How long to wait for the on-screen PIN, 10000–180000                       |
 | `PAIRING_CLIENT_NAME`  | server | `iFFALCON Remote`                  | Name shown on the TV during pairing                                        |
 | `CREDENTIALS_DIR`      | server | `./data/credentials`               | Pairing cert storage. Never commit files here.                             |
-| `WS_ALLOWED_ORIGINS`   | server | empty                              | Optional allowlist. Empty allows any origin on the LAN during development. |
-| `VITE_WS_URL`          | web    | empty                              | Full WebSocket URL. Empty uses the page hostname.                          |
-| `VITE_WS_PORT`         | web    | `8787`                             | Used when `VITE_WS_URL` is empty.                                          |
+| `WS_ALLOWED_ORIGINS`   | server | empty                              | Optional allowlist. Empty allows any origin. Set to your HTTPS URL in production. |
+| `WEB_DIST`             | server | auto (`apps/web/dist`)             | Folder of the built PWA. `false` serves only WebSocket + `/health`.            |
+| `VITE_WS_URL`          | web    | empty                              | Full WebSocket URL. Empty uses the page hostname (`/ws`). Do not set this on the home computer. |
+| `VITE_WS_PORT`         | web    | `8787`                             | Used when `VITE_WS_URL` is empty and the page has no port.                     |
 
 Do not put pairing PINs, certificates, or private keys in frontend env vars.
 
@@ -124,7 +125,7 @@ npm run dev:server
 In another terminal:
 
 ```bash
-npx wscat -c ws://localhost:8787
+npx wscat -c ws://localhost:8787/ws
 ```
 
 Send:
@@ -167,7 +168,88 @@ Unknown commands are rejected:
 
 Expected: `ERROR` with `UNKNOWN_COMMAND`.
 
-From a phone on the same Wi-Fi, open `http://<computer-lan-ip>:5173`. The PWA uses `ws://<computer-lan-ip>:8787` automatically.
+From a phone on the same Wi-Fi, open `http://<computer-lan-ip>:5173`. The PWA uses that same host for the WebSocket (Vite proxies `/ws` to port `8787`).
+
+## Installed phone app
+
+The Vercel/internet home-screen icon is a **different app** from `http://192.168.29.44:5173`. It talks to the cloud Node service, so it cannot list TVs on your Wi-Fi even when the LAN page works.
+
+1. Keep `npm run dev` running on the computer.
+2. On the phone, open `http://<computer-lan-ip>:5173` in the browser (not the internet icon).
+3. Confirm **Available TVs** lists devices.
+4. Browser menu → **Add to Home Screen** / **Install app**.
+5. Delete the old internet icon so you do not open it by mistake.
+
+An HTTPS install cannot use `ws://192.168.x.x` (the browser blocks mixed content). Always install from the LAN `http://…:5173` page **or** from a home HTTPS tunnel (below).
+
+## Deploy so the phone app works
+
+Vercel/Render **cannot** talk to `192.168.x.x`. The Node process that pairs with the TV must stay on a computer (or Raspberry Pi) on the same Wi-Fi. You can still install a normal HTTPS app on the phone by putting a tunnel in front of that home process.
+
+```text
+Phone PWA (https://…)  --WSS-->  Cloudflare Tunnel  -->  Node on home Wi-Fi  -->  iFFALCON
+```
+
+1. On the home computer, leave `VITE_WS_URL` empty in `.env`, then:
+
+```bash
+npm run build
+NODE_ENV=production npm run start
+```
+
+2. In another terminal, expose port `8787` with [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/):
+
+```bash
+npx cloudflared tunnel --url http://localhost:8787
+```
+
+3. Open the `https://….trycloudflare.com` URL on the phone. Confirm TVs appear, then **Add to Home Screen**.
+
+Quick tunnels change URL every restart — do not treat that as a permanent install. For a stable app, create a named tunnel and a hostname such as `remote.yourdomain.com`, then always open that URL.
+
+The computer must stay on and `npm run start` must keep running. Putting only the PWA on Vercel, or only Node on Render, will not control the TV.
+
+## Native Android app
+
+The phone can talk to the TV directly. The laptop can be off. This uses Capacitor plus a Kotlin plugin for Android TV Remote v2 (TLS 6466/6467).
+
+1. Install Android Studio and a phone USB cable (or an emulator on the same Wi-Fi as the TV — a real phone is better).
+2. From this repo:
+
+```bash
+npm install
+npm run icons
+npm run android:sync
+npm run android
+```
+
+3. In Android Studio, wait for Gradle, then Run on your phone.
+4. Phone and iFFALCON must be on the same Wi-Fi. Enter `192.168.29.14` (or Scan), pair with the PIN on the TV, then use the pad.
+
+Status should read **Phone ready — laptop not required**. Pairing certificates stay on the phone.
+
+## Laptop off
+
+This laptop **cannot** run the PWA Node service while it is powered off. Use the **native Android app** above, or a Raspberry Pi for the web PWA.
+
+On that Pi, from this repo:
+
+```bash
+docker compose up -d --build
+```
+
+Then on the phone (same Wi-Fi), open `http://<pi-ip>:8787`, confirm TVs appear, and **Add to Home Screen**. You can shut this laptop down after that.
+
+Without Docker, on the Pi:
+
+```bash
+npm install
+npm run icons
+npm run build
+NODE_ENV=production npm run start
+```
+
+Use `tmux`, `systemd`, or Docker `restart: unless-stopped` so it comes back after a power cut.
 
 ## Architecture
 

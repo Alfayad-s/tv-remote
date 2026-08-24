@@ -1,9 +1,5 @@
 import { AppError } from "../../types/errors.js";
-import type {
-  ConnectOptions,
-  TVAdapter,
-  TVAdapterListener,
-} from "../TVAdapter.js";
+import type { ConnectOptions, TVAdapter, TVAdapterListener } from "../TVAdapter.js";
 import type { RemoteCommand, TVDevice } from "@tv-remote/shared";
 
 function isLoopbackHost(host: string | undefined): boolean {
@@ -56,6 +52,10 @@ export class SwitchingTVAdapter implements TVAdapter {
 
   async sendText(text: string): Promise<void> {
     await this.active.sendText(text);
+  }
+
+  async launchApp(appLink: string): Promise<void> {
+    await this.active.launchApp(appLink);
   }
 
   async submitPin(pin: string): Promise<void> {

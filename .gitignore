@@ -13,3 +13,4 @@ apps/server/data/
 .vite
 *.tsbuildinfo
 .eslintcache
+apps/web/public/downloads/*.apk

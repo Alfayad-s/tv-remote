@@ -1,0 +1,16 @@
+.git
+.DS_Store
+.env
+.env.*
+node_modules
+dist
+dev-dist
+coverage
+data/credentials
+apps/server/data
+*.log
+.vite
+*.tsbuildinfo
+.eslintcache
+agent-transcripts
+.cursor

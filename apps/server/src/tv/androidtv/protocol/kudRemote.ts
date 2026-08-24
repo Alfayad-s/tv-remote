@@ -19,6 +19,9 @@ export const createKudAndroidTvRemote: AndroidTvRemoteFactory = (host, options) 
     sendText: (text) => {
       remote.sendText(text);
     },
+    sendAppLink: (appLink) => {
+      remote.sendAppLink(appLink);
+    },
     getCertificate: () => remote.getCertificate(),
     stop: () => {
       remote.stop();

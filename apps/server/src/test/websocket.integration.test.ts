@@ -5,7 +5,7 @@ import { MockDiscoveryService } from "../discovery/MockDiscoveryService.js";
 import type { Logger } from "../logger.js";
 import { MockTVAdapter } from "../tv/adapters/MockTVAdapter.js";
 import { TVManager } from "../tv/TVManager.js";
-import { createWebSocketServer } from "../websocket/server.js";
+import { createGateway } from "../websocket/server.js";
 
 const silentLogger: Logger = {
   debug() {},
@@ -78,30 +78,37 @@ class TestClient {
 
 describe("WebSocket gateway", () => {
   const config = {
-    ...loadConfig({ HOST: "127.0.0.1", PORT: "8787", TV_ADAPTER: "mock", LOG_LEVEL: "error" }),
+    ...loadConfig({
+      HOST: "127.0.0.1",
+      PORT: "8787",
+      TV_ADAPTER: "mock",
+      LOG_LEVEL: "error",
+      WEB_DIST: "false",
+    }),
     port: 0,
     host: "127.0.0.1",
   };
   const tvManager = new TVManager(new MockTVAdapter({ latencyMs: 0 }), silentLogger);
-  const wss = createWebSocketServer({
+  const gateway = createGateway({
     config,
     logger: silentLogger,
     tvManager,
     discovery: new MockDiscoveryService(),
   });
+  const { httpServer, wss } = gateway;
   let port = 0;
 
   beforeAll(async () => {
-    if (!wss.address()) {
+    if (!httpServer.listening) {
       await new Promise<void>((resolve) => {
-        wss.once("listening", () => {
+        httpServer.once("listening", () => {
           resolve();
         });
       });
     }
-    const address = wss.address();
+    const address = httpServer.address();
     if (!address || typeof address === "string") {
-      throw new Error("WebSocket server did not bind a TCP port");
+      throw new Error("Gateway did not bind a TCP port");
     }
     port = address.port;
   });
@@ -111,14 +118,14 @@ describe("WebSocket gateway", () => {
       client.terminate();
     }
     await new Promise<void>((resolve) => {
-      wss.close(() => {
+      httpServer.close(() => {
         resolve();
       });
     });
   });
 
   it("connects a client through MockTVAdapter and acknowledges HOME", async () => {
-    const client = new TestClient(`ws://127.0.0.1:${String(port)}`);
+    const client = new TestClient(`ws://127.0.0.1:${String(port)}/ws`);
     await client.open();
 
     const hello = await client.next();

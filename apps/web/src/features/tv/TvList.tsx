@@ -1,5 +1,6 @@
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useConnection } from "../../hooks/useConnection.js";
+import { isNativeAndroid } from "../../native/platform.js";
 
 export function TvList() {
   const { devices, selectedTvId, discoveryStatus, tvState, selectTv } = useConnection();
@@ -12,7 +13,7 @@ export function TvList() {
   }
 
   return (
-    <section className="rounded-3xl border border-line bg-glass p-5">
+    <section className="rounded-3xl border border-line bg-glass p-[clamp(0.9rem,3vw,1.25rem)]">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/70">
           Available TVs
@@ -24,8 +25,9 @@ export function TvList() {
 
       {discoveryStatus === "done" && devices.length === 0 ? (
         <p className="mt-4 text-sm leading-6 text-cyan-100/65" data-testid="tv-empty">
-          No TVs found on this network. The TV may be off, on a different Wi-Fi, or blocking mDNS.
-          Enter its IP address below.
+          {isNativeAndroid()
+            ? "No TVs found. Join the same Wi‑Fi as the TV (not guest), allow Nearby devices if the phone asks, then Scan again. Or type the TV IP below."
+            : "No TVs found on this network. If the :5173 page on your computer lists TVs, this install is the internet copy — open that computer address on the phone and add it to the home screen. Otherwise the TV may be off, on a different Wi-Fi, or blocking mDNS."}
         </p>
       ) : null}
 

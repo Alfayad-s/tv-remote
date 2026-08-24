@@ -1,3 +1,4 @@
+export { isTvAppId, TV_APP_IDS, TV_APP_PACKAGES, tvAppLink, type TvAppId } from "./apps.js";
 export { isRemoteCommand, REMOTE_COMMANDS, type RemoteCommand } from "./commands.js";
 export {
   isConnectionState,
@@ -46,6 +47,7 @@ export {
   type DisconnectTvMessage,
   type ErrorMessage,
   type ImeStateMessage,
+  type LaunchAppMessage,
   type PingMessage,
   type PongMessage,
   type ProtocolMessage,
