@@ -50,10 +50,7 @@ describe("RemoteScreen", () => {
     expect(screen.getByText("iFFALCON Remote")).toBeInTheDocument();
     expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Not connected");
     expect(screen.getByRole("button", { name: "Connect TV" })).toBeEnabled();
-    expect(screen.getByRole("link", { name: "Download app" })).toHaveAttribute(
-      "href",
-      "/downloads/iffalcon-remote.apk",
-    );
+    expect(screen.getByRole("button", { name: "Download app" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Home" })).not.toBeInTheDocument();
   });
 

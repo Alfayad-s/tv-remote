@@ -1,5 +1,4 @@
-import { Download } from "lucide-react";
-import { ANDROID_APK_FILENAME, ANDROID_APK_HREF } from "../../utils/androidApk.js";
+import { DownloadAppButton } from "./DownloadAppButton.js";
 
 const FEATURES = [
   {
@@ -29,14 +28,7 @@ export function LandingPage({ onOpenRemote }: { onOpenRemote: () => void }) {
           remote in this browser.
         </p>
 
-        <a
-          href={ANDROID_APK_HREF}
-          download={ANDROID_APK_FILENAME}
-          className="mt-8 flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-accent-strong px-5 text-base font-semibold tracking-wide text-ink shadow-[0_12px_40px_rgb(45_212_191_/_0.28)] transition hover:brightness-110 active:scale-[0.98]"
-        >
-          <Download className="size-5" strokeWidth={2} aria-hidden="true" />
-          Download app
-        </a>
+        <DownloadAppButton className="mt-8" />
         <p className="mt-3 text-center text-sm text-cyan-100/50">
           Android APK. Allow install from this browser if the phone asks.
         </p>

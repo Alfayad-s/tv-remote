@@ -9,7 +9,7 @@ import { ManualIpForm } from "../tv/ManualIpForm.js";
 import { TvList } from "../tv/TvList.js";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useConnection } from "../../hooks/useConnection.js";
-import { ANDROID_APK_FILENAME, ANDROID_APK_HREF } from "../../utils/androidApk.js";
+import { DownloadAppButton } from "../landing/DownloadAppButton.js";
 import { isNativeAndroid } from "../../native/platform.js";
 import { serviceStatusLabel, tvStateLabel } from "../../utils/labels.js";
 import { KeyboardComposer } from "./KeyboardPanel.js";
@@ -164,15 +164,7 @@ export function RemoteScreen() {
         </h1>
       </header>
 
-      {!isNativeAndroid() ? (
-        <a
-          href={ANDROID_APK_HREF}
-          download={ANDROID_APK_FILENAME}
-          className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-accent-strong px-5 text-base font-semibold tracking-wide text-ink shadow-[0_12px_40px_rgb(45_212_191_/_0.28)] transition hover:brightness-110 active:scale-[0.98]"
-        >
-          Download app
-        </a>
-      ) : null}
+      {!isNativeAndroid() ? <DownloadAppButton /> : null}
 
       <ConnectionStatus />
 
