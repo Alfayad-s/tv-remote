@@ -3,5 +3,24 @@
   "installCommand": "npm install",
   "buildCommand": "npm run build -w @tv-remote/shared && npm run build -w @tv-remote/web",
   "outputDirectory": "apps/web/dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "headers": [
+    {
+      "source": "/downloads/(.*).apk",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.android.package-archive"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"iffalcon-remote.apk\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "rewrites": [{ "source": "/((?!downloads/).*)", "destination": "/index.html" }]
 }

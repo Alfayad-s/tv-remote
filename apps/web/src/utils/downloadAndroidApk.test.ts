@@ -27,4 +27,19 @@ describe("downloadAndroidApk", () => {
     expect(createObjectURL).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
+
+  it("does not save a file when the download request fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new TypeError("Failed to fetch");
+      }),
+    );
+    const createObjectURL = vi.fn(() => "blob:apk");
+    vi.stubGlobal("URL", { ...URL, createObjectURL, revokeObjectURL: vi.fn() });
+
+    await expect(downloadAndroidApk()).resolves.toBe(APK_MISSING_MESSAGE);
+    expect(createObjectURL).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
 });

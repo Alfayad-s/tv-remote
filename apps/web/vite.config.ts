@@ -1,55 +1,91 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { createReadStream, existsSync } from "node:fs";
+import { copyFileSync, createReadStream, existsSync, mkdirSync, statSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { join } from "node:path";
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-const apkPublic = fileURLToPath(new URL("./public/downloads/iffalcon-remote.apk", import.meta.url));
-const apkBuild = fileURLToPath(
-  new URL("./android/app/build/outputs/apk/debug/app-debug.apk", import.meta.url),
-);
+const APK_ROUTE = "/downloads/iffalcon-remote.apk";
+const APK_FILENAME = "iffalcon-remote.apk";
 
-function apkFile(): string | null {
-  if (existsSync(apkPublic)) {
-    return apkPublic;
+function gradleApk(root: string): string {
+  return join(root, "android/app/build/outputs/apk/debug/app-debug.apk");
+}
+
+function publicApk(root: string): string {
+  return join(root, "public/downloads", APK_FILENAME);
+}
+
+function resolveApk(root: string): string | null {
+  const staged = publicApk(root);
+  const built = gradleApk(root);
+  if (existsSync(staged)) {
+    return staged;
   }
-  if (existsSync(apkBuild)) {
-    return apkBuild;
+  if (existsSync(built)) {
+    return built;
   }
   return null;
 }
 
-function serveApk(req: IncomingMessage, res: ServerResponse, next: () => void): void {
+function stageApkForWeb(root: string): string | null {
+  const built = gradleApk(root);
+  const staged = publicApk(root);
+  if (existsSync(built)) {
+    mkdirSync(join(root, "public/downloads"), { recursive: true });
+    copyFileSync(built, staged);
+    return staged;
+  }
+  return resolveApk(root);
+}
+
+function serveApk(root: string, req: IncomingMessage, res: ServerResponse, next: () => void): void {
   const url = req.url?.split("?")[0] ?? "";
-  if (url !== "/downloads/iffalcon-remote.apk") {
+  if (url !== APK_ROUTE) {
     next();
     return;
   }
-  const file = apkFile();
+  const file = resolveApk(root) ?? stageApkForWeb(root);
   if (!file) {
     res.statusCode = 404;
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.end("Android APK is not available. Run npm run apk:web after building the APK.");
+    res.end("Android app is not available.");
     return;
   }
+  const { size } = statSync(file);
   res.setHeader("Content-Type", "application/vnd.android.package-archive");
-  res.setHeader("Content-Disposition", 'attachment; filename="iffalcon-remote.apk"');
+  res.setHeader("Content-Disposition", `attachment; filename="${APK_FILENAME}"`);
+  res.setHeader("Content-Length", String(size));
+  res.setHeader("Cache-Control", "no-store");
   createReadStream(file).pipe(res);
+}
+
+function apkDownloadPlugin(): Plugin {
+  let root = process.cwd();
+  return {
+    name: "apk-download",
+    configResolved(config) {
+      root = config.root;
+      stageApkForWeb(root);
+    },
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use((req, res, next) => {
+        serveApk(root, req, res, next);
+      });
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use((req, res, next) => {
+        serveApk(root, req, res, next);
+      });
+    },
+  };
 }
 
 export default defineConfig({
   plugins: [
-    {
-      name: "apk-download",
-      configureServer(server) {
-        server.middlewares.use(serveApk);
-      },
-      configurePreviewServer(server) {
-        server.middlewares.use(serveApk);
-      },
-    },
+    apkDownloadPlugin(),
     react(),
     tailwindcss(),
     VitePWA({

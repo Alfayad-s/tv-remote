@@ -32,12 +32,31 @@ function isInsideDir(dir: string, filePath: string): boolean {
 
 function sendFile(res: ServerResponse, filePath: string, status = 200): void {
   const apk = filePath.toLowerCase().endsWith(".apk");
+  const size = statSync(filePath).size;
   res.writeHead(status, {
     "Content-Type": contentType(filePath),
-    "Cache-Control": filePath.endsWith("index.html") || apk ? "no-cache" : "public, max-age=86400",
+    "Content-Length": String(size),
+    "Cache-Control": filePath.endsWith("index.html") || apk ? "no-store" : "public, max-age=86400",
     ...(apk ? { "Content-Disposition": 'attachment; filename="iffalcon-remote.apk"' } : {}),
   });
   createReadStream(filePath).pipe(res);
+}
+
+function resolveDownloadApk(webDist: string, pathname: string): string | null {
+  if (!pathname.endsWith("/iffalcon-remote.apk")) {
+    return null;
+  }
+  const candidates = [
+    join(webDist, "downloads", "iffalcon-remote.apk"),
+    join(webDist, "..", "public", "downloads", "iffalcon-remote.apk"),
+    join(webDist, "..", "android", "app", "build", "outputs", "apk", "debug", "app-debug.apk"),
+  ];
+  for (const candidate of candidates) {
+    if (existsSync(candidate) && statSync(candidate).isFile()) {
+      return candidate;
+    }
+  }
+  return null;
 }
 
 export function tryServeWebAsset(
@@ -59,6 +78,12 @@ export function tryServeWebAsset(
   }
 
   const decoded = decodeURIComponent(pathname);
+  const downloadApk = resolveDownloadApk(webDist, decoded);
+  if (downloadApk) {
+    sendFile(response, downloadApk);
+    return true;
+  }
+
   const requested = decoded === "/" ? "/index.html" : decoded;
   const filePath = resolve(webDist, requested.slice(1));
   if (!isInsideDir(webDist, filePath)) {

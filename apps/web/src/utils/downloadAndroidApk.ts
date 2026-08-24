@@ -1,7 +1,7 @@
 import { ANDROID_APK_FILENAME, ANDROID_APK_HREF } from "./androidApk.js";
 
 export const APK_MISSING_MESSAGE =
-  "The Android app file was not found. On the computer run npm run apk:web, then try again.";
+  "The Android app could not be downloaded. Refresh the page and try again.";
 
 async function readPrefix(blob: Blob, bytes: number): Promise<Uint8Array> {
   const slice = blob.slice(0, bytes);
@@ -37,9 +37,14 @@ export async function looksLikeApk(blob: Blob): Promise<boolean> {
 }
 
 export async function downloadAndroidApk(): Promise<string | null> {
-  const response = await fetch(`${ANDROID_APK_HREF}?t=${String(Date.now())}`, {
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${ANDROID_APK_HREF}?t=${String(Date.now())}`, {
+      cache: "no-store",
+    });
+  } catch {
+    return APK_MISSING_MESSAGE;
+  }
   if (!response.ok) {
     return APK_MISSING_MESSAGE;
   }

@@ -14,3 +14,4 @@ apps/server/data/
 *.tsbuildinfo
 .eslintcache
 apps/web/public/downloads/*.apk
+!apps/web/public/downloads/iffalcon-remote.apk
