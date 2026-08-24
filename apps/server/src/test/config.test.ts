@@ -15,6 +15,7 @@ describe("loadConfig", () => {
     expect(config.adapter).toBe("mock");
     expect(config.logLevel).toBe("debug");
     expect(config.discoveryMode).toBe("auto");
+    expect(config.includeMock).toBe(true);
     expect(config.discoveryTimeoutMs).toBe(3000);
     expect(config.pairingTimeoutMs).toBe(90_000);
     expect(config.pairingClientName).toBe("iFFALCON Remote");
@@ -28,5 +29,15 @@ describe("loadConfig", () => {
 
     expect(config.logLevel).toBe("info");
     expect(config.adapter).toBe("mock");
+  });
+
+  it("hides the mock TV in production unless INCLUDE_MOCK is true", () => {
+    const production = loadConfig({ NODE_ENV: "production" });
+    expect(production.includeMock).toBe(false);
+    expect(production.discoveryMode).toBe("mdns");
+    expect(production.adapter).toBe("androidtv");
+
+    const forced = loadConfig({ NODE_ENV: "production", INCLUDE_MOCK: "true" });
+    expect(forced.includeMock).toBe(true);
   });
 });

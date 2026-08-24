@@ -85,8 +85,9 @@ npm run dev:server
 | `HOST`                 | server | `0.0.0.0`                          | Bind address. Use `127.0.0.1` for loopback-only.                           |
 | `PORT`                 | server | `8787`                             | WebSocket port                                                             |
 | `LOG_LEVEL`            | server | `info` (`debug` in `.env.example`) | `debug` \| `info` \| `warn` \| `error`                                     |
-| `TV_ADAPTER`           | server | `mock`                             | `mock` routes loopback to the fake TV and LAN IPs to Android TV pairing. `androidtv` always uses the real protocol. |
-| `DISCOVERY_MODE`       | server | `auto`                             | `auto` (mDNS + mock device), `mdns`, or `mock`                             |
+| `TV_ADAPTER`           | server | `mock` (dev) / `androidtv` (production) | `mock` routes loopback to the fake TV and LAN IPs to Android TV pairing. `androidtv` always uses the real protocol. |
+| `DISCOVERY_MODE`       | server | `auto` (dev) / `mdns` (production) | `auto` (mDNS + mock device), `mdns`, or `mock`                             |
+| `INCLUDE_MOCK`         | server | `true` in development, `false` in production | When false, the 127.0.0.1 demo TV is never listed. Set `true` only to force the mock device. |
 | `DISCOVERY_TIMEOUT_MS` | server | `3000`                             | How long an mDNS scan waits, 500–15000                                     |
 | `PAIRING_TIMEOUT_MS`   | server | `90000`                            | How long to wait for the on-screen PIN, 10000–180000                       |
 | `PAIRING_CLIENT_NAME`  | server | `iFFALCON Remote`                  | Name shown on the TV during pairing                                        |

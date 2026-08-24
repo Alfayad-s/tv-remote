@@ -46,6 +46,7 @@ const tvManager = new TVManager(adapter, logger);
 const discovery = createDiscoveryService({
   mode: config.discoveryMode,
   adapter: config.adapter,
+  includeMock: config.includeMock,
   timeoutMs: config.discoveryTimeoutMs,
   logger,
 });

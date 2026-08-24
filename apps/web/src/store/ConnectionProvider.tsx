@@ -8,6 +8,7 @@ import {
   type ConnectionStore,
   type DiscoveryStatus,
 } from "./connectionContext.js";
+import { pickSelectedTvId, withoutMockDevices } from "../utils/tvDevices.js";
 
 export function ConnectionProvider({ children }: { children: ReactNode }) {
   const clientRef = useRef<WebSocketClient | null>(null);
@@ -48,20 +49,13 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
               setLastCommand(message.payload.command);
             }
             break;
-          case "TV_LIST":
-            setDevices(message.payload.devices);
+          case "TV_LIST": {
+            const listed = withoutMockDevices(message.payload.devices, import.meta.env.PROD);
+            setDevices(listed);
             setDiscoveryStatus("done");
-            setSelectedTvId((current) => {
-              if (current && message.payload.devices.some((device) => device.id === current)) {
-                return current;
-              }
-              const only = message.payload.devices[0];
-              const mock = message.payload.devices.find((device) => device.source === "mock");
-              return message.payload.devices.length === 1
-                ? (only?.id ?? null)
-                : (mock?.id ?? current);
-            });
+            setSelectedTvId((current) => pickSelectedTvId(listed, current));
             break;
+          }
           case "COMMAND_ACK":
             if (message.payload.success) {
               setLastCommand(message.payload.command);

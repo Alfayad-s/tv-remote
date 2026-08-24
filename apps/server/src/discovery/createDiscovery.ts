@@ -31,6 +31,7 @@ function createBonjourBrowse(): MdnsBrowse {
 export function createDiscoveryService(options: {
   mode: DiscoveryMode;
   adapter: TvAdapterName;
+  includeMock: boolean;
   timeoutMs: number;
   logger: Logger;
   browse?: MdnsBrowse;
@@ -42,10 +43,10 @@ export function createDiscoveryService(options: {
   });
   const mock = new MockDiscoveryService();
 
-  if (options.mode === "mock") {
+  if (options.mode === "mock" && options.includeMock) {
     return mock;
   }
-  if (options.mode === "mdns") {
+  if (options.mode === "mdns" || !options.includeMock) {
     return mdns;
   }
   if (options.adapter === "mock") {

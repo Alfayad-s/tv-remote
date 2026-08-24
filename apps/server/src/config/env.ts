@@ -9,6 +9,7 @@ export interface ServerConfig {
   logLevel: LogLevel;
   adapter: TvAdapterName;
   discoveryMode: DiscoveryMode;
+  includeMock: boolean;
   discoveryTimeoutMs: number;
   pairingTimeoutMs: number;
   pairingClientName: string;
@@ -64,18 +65,32 @@ function readPairingTimeout(value: string | undefined, fallback: number): number
   return parsed;
 }
 
+function readIncludeMock(env: NodeJS.ProcessEnv): boolean {
+  const raw = env["INCLUDE_MOCK"]?.trim().toLowerCase();
+  if (raw === "true" || raw === "1") {
+    return true;
+  }
+  if (raw === "false" || raw === "0") {
+    return false;
+  }
+  return env["NODE_ENV"] !== "production";
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const allowedOrigins = (env["WS_ALLOWED_ORIGINS"] ?? "")
     .split(",")
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
+  const production = env["NODE_ENV"] === "production";
+
   return {
     host: env["HOST"] ?? "0.0.0.0",
     port: readPort(env["PORT"], 8787),
     logLevel: readEnum(env["LOG_LEVEL"], LOG_LEVELS, "info"),
-    adapter: readEnum(env["TV_ADAPTER"], ADAPTERS, "mock"),
-    discoveryMode: readEnum(env["DISCOVERY_MODE"], DISCOVERY_MODES, "auto"),
+    adapter: readEnum(env["TV_ADAPTER"], ADAPTERS, production ? "androidtv" : "mock"),
+    discoveryMode: readEnum(env["DISCOVERY_MODE"], DISCOVERY_MODES, production ? "mdns" : "auto"),
+    includeMock: readIncludeMock(env),
     discoveryTimeoutMs: readTimeout(env["DISCOVERY_TIMEOUT_MS"], 3000),
     pairingTimeoutMs: readPairingTimeout(env["PAIRING_TIMEOUT_MS"], 90_000),
     pairingClientName: env["PAIRING_CLIENT_NAME"]?.trim() || "iFFALCON Remote",
