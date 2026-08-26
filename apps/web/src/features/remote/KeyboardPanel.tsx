@@ -137,7 +137,7 @@ export function KeyboardPanel({
         autoComplete="off"
         enterKeyHint="enter"
         inputMode="text"
-        autoFocus={autoFocus}
+        autoFocus={false}
         disabled={disabled}
         maxLength={MAX_SEND_TEXT_CHARS}
         className="min-h-11 min-w-0 flex-1 rounded-2xl border border-line bg-[#fff] px-3 text-base text-ink outline-none placeholder:text-black/35 focus:border-accent/50 disabled:opacity-40 sm:min-h-12 sm:px-4"
@@ -165,29 +165,26 @@ export function KeyboardComposer({
   onClose: () => void;
   inputRef: RefObject<HTMLInputElement | null>;
 }) {
+  if (!open) {
+    return null;
+  }
+
   return (
     <div
-      className={
-        open
-          ? "z-20 shrink-0 border-t border-line bg-[#101820] px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
-          : "pointer-events-none fixed bottom-0 left-0 z-[1] h-px w-full"
-      }
-      style={open ? undefined : { opacity: 0 }}
-      role={open ? "dialog" : undefined}
-      aria-hidden={!open}
-      aria-label={open ? "Typing preview" : undefined}
+      className="z-20 shrink-0 border-t border-line bg-[#101820] px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      role="dialog"
+      aria-label="Typing preview"
     >
       <div className="flex items-center gap-2">
         <button
           type="button"
           aria-label="Close keyboard"
-          tabIndex={open ? 0 : -1}
           className="flex size-11 shrink-0 items-center justify-center rounded-2xl text-cyan-100/70 hover:bg-white/8 hover:text-white sm:size-12"
           onClick={onClose}
         >
           <IconClose />
         </button>
-        <KeyboardPanel disabled={disabled} autoFocus={open} inputRef={inputRef} />
+        <KeyboardPanel disabled={disabled} autoFocus inputRef={inputRef} />
       </div>
     </div>
   );

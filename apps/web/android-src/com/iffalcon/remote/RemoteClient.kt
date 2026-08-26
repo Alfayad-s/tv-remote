@@ -22,12 +22,7 @@ internal class RemoteClient(
   private val stopped = AtomicBoolean(false)
 
   fun start() {
-    val sock = TlsSockets.open(context, host, port, cert, readTimeoutMs = 0)
-    socket = sock
-    thread(name = "iffalcon-remote", isDaemon = true) {
-      readLoop(sock)
-      reconnectLoop()
-    }
+    thread(name = "iffalcon-remote", isDaemon = false) { reconnectLoop() }
   }
 
   @Synchronized
@@ -61,28 +56,53 @@ internal class RemoteClient(
     socket?.close()
   }
 
+  fun isRunning(): Boolean = !stopped.get()
+
   @Synchronized
   private fun resetTyped() {
     typed = ""
   }
 
   private fun write(bytes: ByteArray) {
-    val sock = socket ?: throw IllegalStateException("Not connected to the TV.")
+    val sock = waitForSocket() ?: throw IllegalStateException("Not connected to the TV.")
     synchronized(sock) {
       sock.outputStream.write(bytes)
       sock.outputStream.flush()
     }
   }
 
-  private fun reconnectLoop() {
-    var delayMs = 1_000L
-    while (!stopped.get()) {
-      onDropped()
-      resetTyped()
+  private fun waitForSocket(): SSLSocket? {
+    repeat(20) {
+      if (stopped.get()) {
+        return null
+      }
+      val sock = socket
+      if (sock != null && sock.isConnected && !sock.isClosed) {
+        return sock
+      }
       try {
-        Thread.sleep(delayMs)
+        Thread.sleep(250)
       } catch (_: InterruptedException) {
-        return
+        return null
+      }
+    }
+    return socket
+  }
+
+  private fun reconnectLoop() {
+    var delayMs = 0L
+    var dropped = false
+    while (!stopped.get()) {
+      if (dropped) {
+        onDropped()
+        resetTyped()
+      }
+      if (delayMs > 0L) {
+        try {
+          Thread.sleep(delayMs)
+        } catch (_: InterruptedException) {
+          return
+        }
       }
       if (stopped.get()) {
         return
@@ -91,9 +111,11 @@ internal class RemoteClient(
         val sock = TlsSockets.open(context, host, port, cert, readTimeoutMs = 0)
         socket = sock
         delayMs = 1_000L
+        dropped = true
         readLoop(sock)
       } catch (_: Exception) {
-        delayMs = (delayMs * 2).coerceAtMost(30_000L)
+        dropped = true
+        delayMs = (delayMs.coerceAtLeast(1_000L) * 2).coerceAtMost(15_000L)
       }
     }
   }

@@ -167,11 +167,23 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     document.addEventListener("visibilitychange", onResume);
     window.addEventListener("pageshow", onResume);
     window.addEventListener("focus", onResume);
+    const keepAlive =
+      typeof window !== "undefined"
+        ? window.setInterval(() => {
+            const state = tvStateRef.current;
+            if (state === "DISCONNECTED" || state === "ERROR") {
+              restoreIfNeeded("resume");
+            }
+          }, 12_000)
+        : undefined;
 
     return () => {
       document.removeEventListener("visibilitychange", onResume);
       window.removeEventListener("pageshow", onResume);
       window.removeEventListener("focus", onResume);
+      if (keepAlive !== undefined) {
+        window.clearInterval(keepAlive);
+      }
       client.disconnect();
     };
   }, [rememberTv, restoreIfNeeded, updateTvState]);

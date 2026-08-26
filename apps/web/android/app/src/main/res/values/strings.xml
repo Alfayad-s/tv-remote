@@ -4,4 +4,7 @@
     <string name="title_activity_main">iFFALCON Remote</string>
     <string name="package_name">com.iffalcon.remote</string>
     <string name="custom_url_scheme">com.iffalcon.remote</string>
+    <string name="tv_keepalive_channel">TV connection</string>
+    <string name="tv_keepalive_title">iFFALCON Remote</string>
+    <string name="tv_keepalive_text">Staying connected to the TV</string>
 </resources>

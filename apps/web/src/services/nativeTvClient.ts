@@ -19,7 +19,6 @@ export class NativeTvClient {
     void this.listener?.remove();
     this.listener = null;
     this.ready = false;
-    this.handlers.onServiceStatus("closed");
   }
 
   send(_message: Omit<ClientMessage, "id"> & { id?: string }): boolean {

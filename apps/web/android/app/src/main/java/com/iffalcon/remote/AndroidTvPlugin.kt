@@ -31,7 +31,7 @@ class AndroidTvPlugin : Plugin() {
 
   override fun load() {
     controller =
-      TvController(context) { json ->
+      TvRuntime.attach(context) { json ->
         val data = JSObject()
         data.put("json", json)
         notifyListeners("message", data)
@@ -40,6 +40,7 @@ class AndroidTvPlugin : Plugin() {
 
   @PluginMethod
   fun ready(call: PluginCall) {
+    controller.resumeWantedSession()
     call.resolve()
   }
 

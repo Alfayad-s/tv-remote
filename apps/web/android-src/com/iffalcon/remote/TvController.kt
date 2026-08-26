@@ -1,13 +1,16 @@
 package com.iffalcon.remote
 
 import android.content.Context
+import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-internal class TvController(private val context: Context, private val emit: (String) -> Unit) {
+internal class TvController(private val context: Context, private var emit: (String) -> Unit) {
   private val store = CredentialStore(context)
   private val discovery = TvDiscovery(context)
   private val executor = Executors.newSingleThreadExecutor()
@@ -16,6 +19,26 @@ internal class TvController(private val context: Context, private val emit: (Str
   @Volatile private var remote: RemoteClient? = null
   @Volatile private var device: org.json.JSONObject? = null
   @Volatile private var state: String = "DISCONNECTED"
+  private var wifiLock: WifiManager.WifiLock? = null
+  private var wakeLock: PowerManager.WakeLock? = null
+
+  fun setEmit(next: (String) -> Unit) {
+    emit = next
+  }
+
+  fun resumeWantedSession() {
+    if (!SessionPrefs.wanted(context)) {
+      return
+    }
+    val host = SessionPrefs.host(context) ?: return
+    if (remote?.isRunning() == true) {
+      return
+    }
+    if (state == "CONNECTED" || state == "PAIRING" || state == "CONNECTING") {
+      return
+    }
+    connect(host, SessionPrefs.id(context), SessionPrefs.port(context))
+  }
 
   fun discover() {
     executor.execute {
@@ -37,18 +60,18 @@ internal class TvController(private val context: Context, private val emit: (Str
   fun connect(host: String, id: String?, port: Int?) {
     executor.execute {
       try {
-        disconnectLocked(emitDisconnected = false)
+        disconnectLocked(emitDisconnected = false, keepWanted = true)
         val tvId = id ?: "androidtv:$host"
         val remotePort = if (port == null || port == 0 || port == 6467) 6466 else port
-        device =
-          ProtocolJson.device(tvId, "iFFALCON TV", host, remotePort, "manual", false)
-        pushState("CONNECTING", device)
+        device = ProtocolJson.device(tvId, "iFFALCON TV", host, remotePort, "manual", false)
+        SessionPrefs.save(context, host, remotePort, tvId)
+        acquireLocks()
+    pushState("CONNECTING", device)
+    TvKeepAliveService.start(context)
         val existing = store.load(host)
         if (existing != null) {
-          if (startRemote(host, remotePort, existing)) {
-            return@execute
-          }
-          store.clear(host)
+          startRemote(host, remotePort, existing)
+          return@execute
         }
         pairThenConnect(host, remotePort)
       } catch (error: Exception) {
@@ -61,7 +84,16 @@ internal class TvController(private val context: Context, private val emit: (Str
             "Could not reach the TV. Join the same Wi‑Fi as the TV (not guest or VPN), turn off mobile data if needed, then try again. Type the TV IP if it is missing from the list."
           }
         emitOnMain(ProtocolJson.error(code, message))
-        pushState("ERROR", device)
+        pushState("RECONNECTING", device)
+        acquireLocks()
+        TvKeepAliveService.start(context)
+        if (!pinMismatch) {
+          val fallbackHost = SessionPrefs.host(context)
+          val cert = fallbackHost?.let { store.load(it) }
+          if (fallbackHost != null && cert != null && remote?.isRunning() != true) {
+            startRemote(fallbackHost, SessionPrefs.port(context), cert)
+          }
+        }
       }
     }
   }
@@ -82,6 +114,7 @@ internal class TvController(private val context: Context, private val emit: (Str
         }
       } catch (error: Exception) {
         emitOnMain(ProtocolJson.error("INTERNAL_ERROR", error.message ?: "Command failed."))
+        resumeWantedSession()
       }
     }
   }
@@ -95,6 +128,7 @@ internal class TvController(private val context: Context, private val emit: (Str
         remote?.sendText(text) ?: throw IllegalStateException("Connect the TV first.")
       } catch (error: Exception) {
         emitOnMain(ProtocolJson.error("INTERNAL_ERROR", error.message ?: "Could not send text."))
+        resumeWantedSession()
       }
     }
   }
@@ -109,6 +143,7 @@ internal class TvController(private val context: Context, private val emit: (Str
         client.launchApp(appLink)
       } catch (error: Exception) {
         emitOnMain(ProtocolJson.error("INTERNAL_ERROR", error.message ?: "Could not open the app."))
+        resumeWantedSession()
       }
     }
   }
@@ -145,12 +180,13 @@ internal class TvController(private val context: Context, private val emit: (Str
     client.run { pushState("PAIRING", device) }
     store.save(host, cert)
     pairing = null
-    if (!startRemote(host, remotePort, cert)) {
-      throw IllegalStateException("Paired, but the TV remote session did not start.")
-    }
+    startRemote(host, remotePort, cert)
   }
 
   private fun startRemote(host: String, port: Int, cert: ClientCert): Boolean {
+    if (remote?.isRunning() == true) {
+      return true
+    }
     val ready = CountDownLatch(1)
     val client =
       RemoteClient(
@@ -162,31 +198,82 @@ internal class TvController(private val context: Context, private val emit: (Str
           device = device?.put("connected", true)
           pushState("CONNECTED", device)
           emitOnMain(ProtocolJson.tvEvent("CONNECTED", device))
+          acquireLocks()
+          TvKeepAliveService.start(context)
           ready.countDown()
         },
         onIme = { pkg -> emitOnMain(ProtocolJson.ime(pkg != null)) },
         onDropped = {
           pushState("RECONNECTING", device?.put("connected", false))
+          TvKeepAliveService.start(context)
         },
       )
     remote = client
     client.start()
-    val ok = ready.await(20, TimeUnit.SECONDS)
-    if (!ok) {
-      client.stop()
-      remote = null
+    val ok = ready.await(25, TimeUnit.SECONDS)
+    if (!ok && state != "CONNECTED") {
+      pushState("RECONNECTING", device?.put("connected", false))
     }
-    return ok
+    return true
   }
 
-  private fun disconnectLocked(emitDisconnected: Boolean = true) {
+  private fun disconnectLocked(emitDisconnected: Boolean = true, keepWanted: Boolean = false) {
     pairing?.close()
     pairing = null
     remote?.stop()
     remote = null
     device = device?.put("connected", false)
+    if (!keepWanted) {
+      SessionPrefs.clear(context)
+      releaseLocks()
+      TvKeepAliveService.stop(context)
+    }
     if (emitDisconnected) {
       pushState("DISCONNECTED", device)
     }
+  }
+
+  private fun acquireLocks() {
+    try {
+      if (wifiLock?.isHeld != true) {
+        val wifi = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val mode =
+          if (Build.VERSION.SDK_INT >= 29) {
+            WifiManager.WIFI_MODE_FULL_LOW_LATENCY
+          } else {
+            @Suppress("DEPRECATION")
+            WifiManager.WIFI_MODE_FULL_HIGH_PERF
+          }
+        wifiLock = wifi.createWifiLock(mode, "iffalcon-tv-wifi").apply { setReferenceCounted(false) }
+        wifiLock?.acquire()
+      }
+    } catch (_: Exception) {
+    }
+    try {
+      if (wakeLock?.isHeld != true) {
+        val pm = context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock =
+          pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "iffalcon:tv").apply { setReferenceCounted(false) }
+        wakeLock?.acquire()
+      }
+    } catch (_: Exception) {
+    }
+  }
+
+  private fun releaseLocks() {
+    try {
+      if (wifiLock?.isHeld == true) {
+        wifiLock?.release()
+      }
+    } catch (_: Exception) {
+    }
+    wifiLock = null
+    try {
+      if (wakeLock?.isHeld == true) {
+        wakeLock?.release()
+      }
+    } catch (_: Exception) {
+    }
+    wakeLock = null
   }
 }

@@ -10,12 +10,13 @@ if (!root) {
   throw new Error("Root element not found");
 }
 
-if (!isNativeAndroid()) {
+if (isNativeAndroid()) {
+  createRoot(root).render(<App />);
+} else {
   registerSW({ immediate: true });
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
 }
-
-createRoot(root).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);

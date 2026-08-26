@@ -43,13 +43,11 @@ export function RemoteScreen() {
     lastCommand,
     discoverTvs,
     discoveryStatus,
-    imeActive,
   } = useConnection();
   const haptic = useHaptics();
   const [panel, setPanel] = useState<RemotePanel>("remote");
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const previewInputRef = useRef<HTMLInputElement>(null);
-  const wasImeActive = useRef(false);
   const wasConnected = useRef(false);
   const canSend = tvState === "CONNECTED";
   const showRemote =
@@ -64,14 +62,6 @@ export function RemoteScreen() {
     }
     wasConnected.current = tvState === "CONNECTED";
   }, [tvState]);
-
-  useEffect(() => {
-    if (imeActive && !wasImeActive.current && tvState === "CONNECTED") {
-      haptic();
-      setKeyboardOpen(true);
-    }
-    wasImeActive.current = imeActive;
-  }, [haptic, imeActive, tvState]);
 
   const openKeyboard = (): void => {
     haptic();
