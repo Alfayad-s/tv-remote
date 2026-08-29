@@ -65,6 +65,18 @@ export class NativeTvClient {
     void AndroidTv.disconnect();
   }
 
+  async resetApp(): Promise<void> {
+    try {
+      await AndroidTv.reset();
+    } catch {
+      try {
+        await AndroidTv.disconnect();
+      } catch {
+        // Older APKs without reset still drop the TV session.
+      }
+    }
+  }
+
   sendCommand(command: RemoteCommand): void {
     void AndroidTv.sendKey({ command }).catch((error: unknown) => {
       this.handlers.onMalformed(error instanceof Error ? error.message : "Command failed.");

@@ -28,6 +28,7 @@ function renderRemote(overrides: Partial<ConnectionStore> = {}) {
     imeActive: false,
     connectTv: vi.fn(),
     disconnectTv: vi.fn(),
+    resetApp: vi.fn(),
     sendCommand: vi.fn(),
     sendText: vi.fn(),
     launchApp: vi.fn(),
@@ -94,8 +95,31 @@ describe("RemoteScreen", () => {
 
     expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reset" })).toBeInTheDocument();
     expect(screen.queryByText("iFFALCON Remote")).not.toBeInTheDocument();
     expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Connecting");
+  });
+
+  it("resets saved data from connecting and reconnecting", async () => {
+    const user = userEvent.setup();
+    const connecting = renderRemote({
+      tvState: "CONNECTING",
+      tv: { ...mockTv, connected: false },
+    });
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+    expect(connecting.value.resetApp).toHaveBeenCalledTimes(1);
+
+    connecting.unmount();
+    const reconnecting = renderRemote({
+      tvState: "RECONNECTING",
+      tv: { ...mockTv, connected: false },
+    });
+    expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Check connection");
+    expect(
+      screen.getByText("Check the connection. The TV and phone must be on the same Wi‑Fi."),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+    expect(reconnecting.value.resetApp).toHaveBeenCalledTimes(1);
   });
 
   it("opens a typing preview on the same remote page", async () => {

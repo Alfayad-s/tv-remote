@@ -15,6 +15,7 @@ export interface AndroidTvPlugin {
   discover(): Promise<void>;
   connect(options: { host: string; id?: string; port?: number }): Promise<void>;
   disconnect(): Promise<void>;
+  reset(): Promise<void>;
   submitPin(options: { pin: string }): Promise<void>;
   sendKey(options: { command: RemoteCommand }): Promise<void>;
   sendText(options: { text: string }): Promise<void>;

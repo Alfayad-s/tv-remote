@@ -28,6 +28,7 @@ function renderPairing(overrides: Partial<ConnectionStore> = {}) {
     imeActive: false,
     connectTv: vi.fn(),
     disconnectTv: vi.fn(),
+    resetApp: vi.fn(),
     sendCommand: vi.fn(),
     sendText: vi.fn(),
     launchApp: vi.fn(),

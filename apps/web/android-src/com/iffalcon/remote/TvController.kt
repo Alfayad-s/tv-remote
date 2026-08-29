@@ -152,6 +152,16 @@ internal class TvController(private val context: Context, private var emit: (Str
     executor.execute { disconnectLocked() }
   }
 
+  fun reset() {
+    executor.execute {
+      disconnectLocked(emitDisconnected = false, keepWanted = false)
+      store.clearAll()
+      SessionPrefs.clear(context)
+      device = null
+      pushState("DISCONNECTED", null)
+    }
+  }
+
   fun snapshot(done: (String) -> Unit) {
     executor.execute { done(ProtocolJson.connectionState(state, device)) }
   }

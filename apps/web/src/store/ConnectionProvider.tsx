@@ -11,6 +11,7 @@ import {
 } from "./connectionContext.js";
 import { pickSelectedTvId, withoutMockDevices } from "../utils/tvDevices.js";
 import {
+  EMPTY_SESSION,
   readSession,
   savedTvToDevice,
   shouldRestoreOnReady,
@@ -20,6 +21,7 @@ import {
   type SavedSession,
   type SavedTv,
 } from "../utils/sessionStore.js";
+import { reloadApp, wipeClientData } from "../utils/resetAppData.js";
 
 function persist(session: SavedSession): SavedSession {
   writeSession(session);
@@ -229,6 +231,26 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
     clientRef.current?.disconnectTv();
   }, [updateTvState]);
 
+  const resetApp = useCallback(() => {
+    sessionRef.current = persist(EMPTY_SESSION);
+    updateTvState("DISCONNECTED");
+    setTv(null);
+    setDevices([]);
+    setSelectedTvId(null);
+    setLastError(null);
+    setLastCommand(null);
+    setImeActive(false);
+    void (async () => {
+      try {
+        await clientRef.current?.resetApp();
+      } catch {
+        clientRef.current?.disconnectTv();
+      }
+      await wipeClientData();
+      reloadApp();
+    })();
+  }, [updateTvState]);
+
   const sendCommand = useCallback((command: RemoteCommand) => {
     clientRef.current?.sendCommand(command);
   }, []);
@@ -284,6 +306,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       imeActive,
       connectTv,
       disconnectTv,
+      resetApp,
       sendCommand,
       sendText,
       launchApp,
@@ -303,6 +326,7 @@ export function ConnectionProvider({ children }: { children: ReactNode }) {
       imeActive,
       connectTv,
       disconnectTv,
+      resetApp,
       sendCommand,
       sendText,
       launchApp,

@@ -6,7 +6,7 @@ const COLOR: Record<ConnectionState | ServiceStatus, string> = {
   CONNECTING: "bg-warn animate-pulse",
   CONNECTED: "bg-ok",
   PAIRING: "bg-warn animate-pulse",
-  RECONNECTING: "bg-warn animate-pulse",
+  RECONNECTING: "bg-danger",
   ERROR: "bg-danger",
   connecting: "bg-warn animate-pulse",
   open: "bg-ok",

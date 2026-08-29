@@ -63,6 +63,10 @@ export class WebSocketClient {
     this.send({ type: "DISCONNECT_TV", payload: {} });
   }
 
+  async resetApp(): Promise<void> {
+    this.disconnectTv();
+  }
+
   sendCommand(command: RemoteCommand): void {
     this.send({ type: "REMOTE_COMMAND", payload: { command } });
   }

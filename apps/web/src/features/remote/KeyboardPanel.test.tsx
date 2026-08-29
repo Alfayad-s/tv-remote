@@ -18,6 +18,7 @@ function renderKeyboard(disabled = false) {
     imeActive: false,
     connectTv: vi.fn(),
     disconnectTv: vi.fn(),
+    resetApp: vi.fn(),
     sendCommand: vi.fn(),
     sendText: vi.fn(() => true),
     launchApp: vi.fn(),

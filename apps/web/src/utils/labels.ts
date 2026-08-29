@@ -13,10 +13,16 @@ export function tvStateLabel(state: ConnectionState): string {
     case "PAIRING":
       return "Pairing…";
     case "RECONNECTING":
-      return "Trying to reconnect…";
     case "ERROR":
-      return "Connection error";
+      return "Check connection";
   }
+}
+
+export const WIFI_CONNECTION_HELP =
+  "Check the connection. The TV and phone must be on the same Wi‑Fi.";
+
+export function needsWifiConnectionHelp(state: ConnectionState): boolean {
+  return state === "CONNECTING" || state === "RECONNECTING" || state === "ERROR";
 }
 
 export function serviceStatusLabel(

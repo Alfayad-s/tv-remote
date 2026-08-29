@@ -44,6 +44,10 @@ internal class CredentialStore(context: Context) {
     fileFor(host).delete()
   }
 
+  fun clearAll() {
+    dir.listFiles()?.forEach { file -> file.delete() }
+  }
+
   private fun fileFor(host: String): File {
     val safe = host.replace(Regex("[^A-Za-z0-9._-]"), "_")
     return File(dir, "$safe.json")

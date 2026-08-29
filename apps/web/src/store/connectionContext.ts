@@ -22,6 +22,7 @@ export interface ConnectionStore {
   imeActive: boolean;
   connectTv: (options?: ConnectTvOptions) => void;
   disconnectTv: () => void;
+  resetApp: () => void;
   sendCommand: (command: RemoteCommand) => void;
   sendText: (text: string) => boolean;
   launchApp: (app: TvAppId) => boolean;

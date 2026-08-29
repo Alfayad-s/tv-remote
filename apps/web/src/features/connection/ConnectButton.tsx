@@ -3,15 +3,16 @@ import { useHaptics } from "../../hooks/useHaptics.js";
 import { useConnection } from "../../hooks/useConnection.js";
 
 export function ConnectButton({ compact = false }: { compact?: boolean }) {
-  const { serviceStatus, tvState, tv, selectedTvId, connectTv, disconnectTv } = useConnection();
+  const { serviceStatus, tvState, selectedTvId, connectTv, disconnectTv, resetApp } =
+    useConnection();
   const haptic = useHaptics();
   const serviceReady = serviceStatus === "open";
   const connected = tvState === "CONNECTED";
   const pairing = tvState === "PAIRING";
-  const busy = tvState === "CONNECTING" || tvState === "RECONNECTING";
+  const busy = tvState === "CONNECTING" || tvState === "RECONNECTING" || tvState === "ERROR";
   const size = compact ? "sm" : "md";
 
-  if (connected || (tvState === "ERROR" && tv)) {
+  if (connected) {
     return (
       <Button
         variant="ghost"
@@ -32,16 +33,30 @@ export function ConnectButton({ compact = false }: { compact?: boolean }) {
 
   if (busy) {
     return (
-      <Button
-        variant="ghost"
-        size={size}
-        onClick={() => {
-          haptic();
-          disconnectTv();
-        }}
-      >
-        Cancel
-      </Button>
+      <div className={`flex shrink-0 items-center gap-2 ${compact ? "" : "w-full"}`}>
+        <Button
+          variant="danger"
+          size={size}
+          className={compact ? "" : "flex-1"}
+          onClick={() => {
+            haptic();
+            resetApp();
+          }}
+        >
+          Reset
+        </Button>
+        <Button
+          variant="ghost"
+          size={size}
+          className={compact ? "" : "flex-1"}
+          onClick={() => {
+            haptic();
+            disconnectTv();
+          }}
+        >
+          Cancel
+        </Button>
+      </div>
     );
   }
 

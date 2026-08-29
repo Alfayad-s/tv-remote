@@ -97,6 +97,12 @@ class AndroidTvPlugin : Plugin() {
   }
 
   @PluginMethod
+  fun reset(call: PluginCall) {
+    controller.reset()
+    call.resolve()
+  }
+
+  @PluginMethod
   fun submitPin(call: PluginCall) {
     val pin = call.getString("pin")
     if (pin.isNullOrBlank()) {

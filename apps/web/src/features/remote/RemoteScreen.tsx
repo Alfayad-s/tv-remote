@@ -11,7 +11,12 @@ import { useHaptics } from "../../hooks/useHaptics.js";
 import { useConnection } from "../../hooks/useConnection.js";
 import { DownloadAppButton } from "../landing/DownloadAppButton.js";
 import { isNativeAndroid } from "../../native/platform.js";
-import { serviceStatusLabel, tvStateLabel } from "../../utils/labels.js";
+import {
+  needsWifiConnectionHelp,
+  serviceStatusLabel,
+  tvStateLabel,
+  WIFI_CONNECTION_HELP,
+} from "../../utils/labels.js";
 import { KeyboardComposer } from "./KeyboardPanel.js";
 import { RemotePad } from "./RemotePad.js";
 import { IconTabRemote, IconTabTouchpad } from "./remoteIcons.js";
@@ -115,7 +120,11 @@ export function RemoteScreen() {
           <ConnectButton compact />
         </div>
 
-        {lastError ? (
+        {needsWifiConnectionHelp(tvState) ? (
+          <p className="mt-2 shrink-0 rounded-2xl border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-rose-100">
+            {WIFI_CONNECTION_HELP}
+          </p>
+        ) : lastError ? (
           <p className="mt-2 shrink-0 rounded-2xl border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-rose-100">
             {lastError}
           </p>
@@ -165,7 +174,11 @@ export function RemoteScreen() {
 
       {!isNativeAndroid() ? <HomeNetworkCard /> : null}
 
-      {lastError ? (
+      {needsWifiConnectionHelp(tvState) ? (
+        <p className="rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-rose-100">
+          {WIFI_CONNECTION_HELP}
+        </p>
+      ) : lastError ? (
         <p className="rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-rose-100">
           {lastError}
         </p>
