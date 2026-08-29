@@ -14,6 +14,7 @@ export const TOUCHPAD_TAP_SLOP_PX = 18;
 export const TOUCHPAD_LONG_PRESS_MS = 520;
 export const TOUCHPAD_AXIS_LOCK_PX = 12;
 export const TOUCHPAD_MAX_STEPS_PER_MOVE = 6;
+export const VOLUME_STEP_PX = 36;
 
 const STORAGE_KEY = "tv-remote.touchpad-sensitivity";
 
@@ -107,4 +108,19 @@ export function applyPointerDelta(
   }
 
   return { next: { remainderX, remainderY, axis }, commands };
+}
+
+export function applyVolumeDelta(
+  remainder: number,
+  dy: number,
+  stepPx: number = VOLUME_STEP_PX,
+): { next: number; commands: Array<"VOLUME_UP" | "VOLUME_DOWN"> } {
+  let next = remainder + dy;
+  const commands: Array<"VOLUME_UP" | "VOLUME_DOWN"> = [];
+  while (commands.length < TOUCHPAD_MAX_STEPS_PER_MOVE && Math.abs(next) >= stepPx) {
+    const sign = next > 0 ? 1 : -1;
+    commands.push(sign > 0 ? "VOLUME_DOWN" : "VOLUME_UP");
+    next -= sign * stepPx;
+  }
+  return { next, commands };
 }

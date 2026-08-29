@@ -165,4 +165,16 @@ describe("TouchPad", () => {
     expect(value.sendCommand).toHaveBeenCalledWith("BACK");
     expect(onOpenKeyboard).toHaveBeenCalledTimes(1);
   });
+
+  it("changes volume when swiping the volume strip", () => {
+    const { value } = renderPad();
+    const strip = screen.getByTestId("volume-strip");
+
+    point(strip, "pointerdown", 20, 160);
+    point(strip, "pointermove", 20, 80);
+    point(strip, "pointerup", 20, 80);
+
+    expect(value.sendCommand).toHaveBeenCalledWith("VOLUME_UP");
+    expect(value.sendCommand).not.toHaveBeenCalledWith("OK");
+  });
 });

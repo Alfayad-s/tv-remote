@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   applyPointerDelta,
+  applyVolumeDelta,
   createSwipeAccumulator,
   isTouchpadSensitivity,
   readTouchpadSensitivity,
   TOUCHPAD_AXIS_LOCK_PX,
   TOUCHPAD_MAX_STEPS_PER_MOVE,
+  VOLUME_STEP_PX,
   writeTouchpadSensitivity,
 } from "./touchpadGestures.js";
 
@@ -30,6 +32,13 @@ describe("touchpadGestures", () => {
     expect(burst.commands).toHaveLength(TOUCHPAD_MAX_STEPS_PER_MOVE);
     expect(burst.commands.every((command) => command === "DOWN")).toBe(true);
     expect(Math.abs(burst.next.remainderY)).toBeGreaterThan(0);
+  });
+
+  it("turns a vertical swipe into volume steps", () => {
+    const up = applyVolumeDelta(0, -VOLUME_STEP_PX, VOLUME_STEP_PX);
+    expect(up.commands).toEqual(["VOLUME_UP"]);
+    const down = applyVolumeDelta(up.next, VOLUME_STEP_PX * 2, VOLUME_STEP_PX);
+    expect(down.commands).toEqual(["VOLUME_DOWN", "VOLUME_DOWN"]);
   });
 
   it("reads and writes sensitivity", () => {

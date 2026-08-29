@@ -82,6 +82,8 @@ describe("RemoteScreen", () => {
     expect(screen.queryByText("iFFALCON Remote")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Disconnect" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Disconnect" }));
+    expect(value.resetApp).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("button", { name: "Home" }));
     expect(value.sendCommand).toHaveBeenCalledWith("HOME");
     expect(screen.queryByRole("button", { name: /^Keyboard$/ })).not.toBeInTheDocument();

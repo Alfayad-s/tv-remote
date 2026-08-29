@@ -19,7 +19,7 @@ export function ConnectButton({ compact = false }: { compact?: boolean }) {
         size={size}
         onClick={() => {
           haptic();
-          disconnectTv();
+          resetApp();
         }}
       >
         Disconnect

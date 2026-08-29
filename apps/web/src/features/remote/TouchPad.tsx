@@ -6,6 +6,7 @@ import { RemoteKey } from "./RemoteKey.js";
 import { IconBack, IconKeyboard } from "./remoteIcons.js";
 import {
   applyPointerDelta,
+  applyVolumeDelta,
   createSwipeAccumulator,
   movementDistance,
   readTouchpadSensitivity,
@@ -26,6 +27,70 @@ interface PointerSession {
   sentSwipe: boolean;
   longPressed: boolean;
   acc: SwipeAccumulator;
+}
+
+function VolumeStrip({ disabled }: { disabled: boolean }) {
+  const { sendCommand } = useConnection();
+  const haptic = useHaptics();
+  const sessionRef = useRef<{ pointerId: number; lastY: number; remainder: number } | null>(null);
+  const [active, setActive] = useState(false);
+
+  const endSession = (event: PointerEvent<HTMLDivElement>): void => {
+    const session = sessionRef.current;
+    if (!session || session.pointerId !== event.pointerId) {
+      return;
+    }
+    sessionRef.current = null;
+    setActive(false);
+  };
+
+  return (
+    <div
+      role="slider"
+      aria-label="Volume"
+      aria-orientation="vertical"
+      aria-disabled={disabled}
+      data-testid="volume-strip"
+      onPointerDown={(event) => {
+        if (disabled || sessionRef.current) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+        sessionRef.current = { pointerId: event.pointerId, lastY: event.clientY, remainder: 0 };
+        setActive(true);
+      }}
+      onPointerMove={(event) => {
+        const session = sessionRef.current;
+        if (!session || session.pointerId !== event.pointerId || disabled) {
+          return;
+        }
+        const dy = event.clientY - session.lastY;
+        session.lastY = event.clientY;
+        const { next, commands } = applyVolumeDelta(session.remainder, dy);
+        session.remainder = next;
+        if (commands.length === 0) {
+          return;
+        }
+        haptic(8);
+        for (const command of commands) {
+          sendCommand(command);
+        }
+      }}
+      onPointerUp={endSession}
+      onPointerCancel={endSession}
+      className={`flex w-14 shrink-0 touch-none select-none flex-col items-center justify-between self-stretch rounded-[1.75rem] border border-line bg-ink-soft/90 py-3 ${
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-ns-resize"
+      } ${active ? "border-accent/50" : ""}`}
+    >
+      <span className="text-xs font-semibold text-cyan-100/70">+</span>
+      <p className="rotate-180 text-[10px] uppercase tracking-[0.18em] text-cyan-100/45 [writing-mode:vertical-rl]">
+        Volume
+      </p>
+      <span className="text-xs font-semibold text-cyan-100/70">−</span>
+    </div>
+  );
 }
 
 const SENSITIVITY_OPTIONS: { id: TouchpadSensitivity; label: string }[] = [
@@ -175,6 +240,7 @@ export function TouchPad({
       className={`flex min-h-0 flex-col gap-[clamp(0.5rem,1.4dvh,0.75rem)] ${fill ? "flex-1" : ""}`}
       aria-label={compact ? "Remote touchpad" : "Touchpad"}
     >
+      <div className={`flex min-h-0 gap-3 ${fill ? "flex-1" : ""}`}>
       <div
         role="application"
         aria-label="TV touchpad"
@@ -191,8 +257,8 @@ export function TouchPad({
         onContextMenu={(event) => {
           event.preventDefault();
         }}
-        className={`relative isolate touch-none overflow-hidden rounded-[1.75rem] border border-line bg-ink-soft/90 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.06)] select-none ${
-          compact ? "min-h-[11rem]" : fill ? "min-h-0 flex-1" : "min-h-[18.5rem]"
+        className={`relative isolate min-w-0 touch-none overflow-hidden rounded-[1.75rem] border border-line bg-ink-soft/90 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.06)] select-none ${
+          compact ? "min-h-[11rem] flex-1" : fill ? "min-h-0 flex-1" : "min-h-[18.5rem] flex-1"
         } ${disabled ? "cursor-not-allowed opacity-40" : "cursor-none"}`}
       >
         <div
@@ -220,6 +286,8 @@ export function TouchPad({
             style={{ left: `${String(cursor.x)}%`, top: `${String(cursor.y)}%` }}
           />
         ) : null}
+      </div>
+      <VolumeStrip disabled={disabled} />
       </div>
 
       <div className="flex items-center justify-between gap-3">
