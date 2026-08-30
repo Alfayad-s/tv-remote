@@ -35,7 +35,7 @@ export default function App() {
   if (isNativeAndroid() || isRemotePath(path)) {
     return (
       <ConnectionProvider>
-        <AppShell>
+        <AppShell immersive={isNativeAndroid()}>
           <RemoteScreen />
         </AppShell>
       </ConnectionProvider>

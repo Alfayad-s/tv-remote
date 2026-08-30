@@ -82,7 +82,7 @@ export function RemoteScreen() {
 
   if (showRemote) {
     return (
-      <main className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-5">
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 pt-3 sm:px-4 sm:pt-5">
         <div className="mt-1 grid shrink-0 grid-cols-2 overflow-hidden border-4 border-ink">
           {PANELS.map((item) => {
             const Icon = item.icon;
@@ -138,7 +138,7 @@ export function RemoteScreen() {
           )}
         </div>
 
-        {keyboardOpen ? null : (
+        {keyboardOpen || isNativeAndroid() ? null : (
           <div className="mt-4 hidden shrink-0 flex-col items-center gap-3 pb-3 min-[400px]:flex [@media(orientation:landscape)_and_(max-height:560px)]:hidden">
             <p className="min-w-[12.5rem] bg-ink px-3.5 py-2 text-center font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-accent-strong">
               <ConnectedHint panel={panel} lastCommand={lastCommand} />
