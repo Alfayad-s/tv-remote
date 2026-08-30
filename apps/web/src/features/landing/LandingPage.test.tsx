@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { LandingPage } from "./LandingPage.js";
@@ -22,7 +22,11 @@ describe("LandingPage", () => {
       "https://alfayad.vercel.app",
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Contact" })[0]);
+    await user.click(
+      within(screen.getByRole("navigation", { name: "Site" })).getByRole("button", {
+        name: "Contact",
+      }),
+    );
     expect(onGo).toHaveBeenCalledWith("/contact");
   });
 });
