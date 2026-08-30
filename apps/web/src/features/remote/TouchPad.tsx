@@ -80,15 +80,15 @@ function VolumeStrip({ disabled }: { disabled: boolean }) {
       }}
       onPointerUp={endSession}
       onPointerCancel={endSession}
-      className={`flex w-14 shrink-0 touch-none select-none flex-col items-center justify-between self-stretch rounded-[1.75rem] border border-line bg-ink-soft/90 py-3 ${
+      className={`flex w-14 shrink-0 touch-none select-none flex-col items-center justify-between self-stretch border-4 border-ink bg-paper py-3 shadow-[5px_5px_0_#111] ${
         disabled ? "cursor-not-allowed opacity-40" : "cursor-ns-resize"
-      } ${active ? "border-accent/50" : ""}`}
+      } ${active ? "bg-accent-strong" : ""}`}
     >
-      <span className="text-xs font-semibold text-cyan-100/70">+</span>
-      <p className="rotate-180 text-[10px] uppercase tracking-[0.18em] text-cyan-100/45 [writing-mode:vertical-rl]">
+      <span className="text-xs font-bold">+</span>
+      <p className="rotate-180 font-mono text-[10px] font-bold uppercase tracking-[0.18em] [writing-mode:vertical-rl]">
         Volume
       </p>
-      <span className="text-xs font-semibold text-cyan-100/70">−</span>
+      <span className="text-xs font-bold">−</span>
     </div>
   );
 }
@@ -257,24 +257,24 @@ export function TouchPad({
         onContextMenu={(event) => {
           event.preventDefault();
         }}
-        className={`relative isolate min-w-0 touch-none overflow-hidden rounded-[1.75rem] border border-line bg-ink-soft/90 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.06)] select-none ${
+        className={`relative isolate min-w-0 touch-none overflow-hidden border-4 border-ink bg-paper shadow-[5px_5px_0_#111] select-none ${
           compact ? "min-h-[11rem] flex-1" : fill ? "min-h-0 flex-1" : "min-h-[18.5rem] flex-1"
         } ${disabled ? "cursor-not-allowed opacity-40" : "cursor-none"}`}
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-6 rounded-[1.35rem] border border-dashed border-white/8"
+          className="pointer-events-none absolute inset-6 border-2 border-dashed border-ink/20"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-8 bottom-8 w-px bg-white/8"
+          className="pointer-events-none absolute left-1/2 top-8 bottom-8 w-px bg-ink/15"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-8 right-8 h-px bg-white/8"
+          className="pointer-events-none absolute top-1/2 left-8 right-8 h-px bg-ink/15"
         />
         {!active ? (
-          <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-cyan-100/45">
+          <p className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-sm font-bold uppercase tracking-wide text-ink/45">
             Swipe to browse
           </p>
         ) : null}
@@ -282,7 +282,7 @@ export function TouchPad({
           <span
             aria-hidden="true"
             data-testid="touchpad-cursor"
-            className="pointer-events-none absolute size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent/80 bg-accent-strong/80 shadow-[0_0_24px_rgb(45_212_191_/_0.55)]"
+            className="pointer-events-none absolute size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-ink bg-accent-strong"
             style={{ left: `${String(cursor.x)}%`, top: `${String(cursor.y)}%` }}
           />
         ) : null}
@@ -291,16 +291,18 @@ export function TouchPad({
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[10px] uppercase tracking-[0.18em] text-cyan-100/40">Sensitivity</p>
-        <div className="grid grid-cols-3 gap-1 rounded-full border border-line bg-ink-soft/70 p-1">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-ink/50">
+          Sensitivity
+        </p>
+        <div className="grid grid-cols-3 gap-1 border-4 border-ink bg-paper p-1 shadow-[3px_3px_0_#111]">
           {SENSITIVITY_OPTIONS.map((option) => (
             <button
               key={option.id}
               type="button"
               aria-pressed={sensitivity === option.id}
               aria-label={`${option.label} sensitivity`}
-              className={`min-h-9 rounded-full px-3 text-xs font-semibold ${
-                sensitivity === option.id ? "bg-accent-strong text-ink" : "text-cyan-100/70"
+              className={`min-h-9 px-3 font-mono text-xs font-bold uppercase ${
+                sensitivity === option.id ? "bg-accent-strong" : "bg-paper"
               }`}
               onClick={() => {
                 chooseSensitivity(option.id);

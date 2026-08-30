@@ -29,7 +29,7 @@ export function HomeNetworkCard({
   if (isPrivateHostname(hostname)) {
     return (
       <p
-        className="rounded-2xl border border-accent/25 bg-accent/10 px-4 py-3 text-sm leading-6 text-cyan-50"
+        className="border-4 border-ink bg-green px-4 py-3 text-sm leading-6"
         data-testid="lan-install-hint"
       >
         This page is on your Wi‑Fi and can list TVs. Add <strong>this</strong> page to the home
@@ -57,18 +57,18 @@ export function HomeNetworkCard({
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-3xl border border-warn/30 bg-warn/10 p-[clamp(0.9rem,3vw,1.25rem)]"
+      className="flex flex-col gap-3 border-4 border-ink bg-accent-strong p-4 shadow-[5px_5px_0_#111]"
       onSubmit={onSubmit}
       data-testid="home-network-card"
     >
-      <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-100/80">
+      <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
         Home Wi‑Fi
       </h2>
-      <p className="text-sm leading-6 text-amber-50/90">
+      <p className="text-sm leading-6">
         This home-screen app is the internet copy. It cannot list TVs on your network. Open the
         computer page that already works, then install from there.
       </p>
-      <label className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-100/70">
+      <label className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
         Computer IP
         <input
           value={value}
@@ -81,10 +81,10 @@ export function HomeNetworkCard({
           autoCorrect="off"
           spellCheck={false}
           inputMode="decimal"
-          className="mt-2 min-h-14 w-full rounded-2xl border border-line bg-ink-soft/80 px-4 text-base text-white outline-none placeholder:text-cyan-100/25 focus:border-accent/50"
+          className="mt-2 min-h-14 w-full border-4 border-ink bg-paper px-4 font-sans text-base text-ink outline-none placeholder:text-ink/35"
         />
       </label>
-      {error ? <p className="text-sm text-rose-200">{error}</p> : null}
+      {error ? <p className="text-sm font-bold text-coral">{error}</p> : null}
       <Button type="submit">Open on this Wi‑Fi</Button>
     </form>
   );

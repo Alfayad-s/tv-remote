@@ -13,18 +13,18 @@ export function TvList() {
   }
 
   return (
-    <section className="rounded-3xl border border-line bg-glass p-[clamp(0.9rem,3vw,1.25rem)]">
+    <section className="border-4 border-ink bg-paper p-4 shadow-[5px_5px_0_#111]">
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/70">
+        <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
           Available TVs
         </h2>
         {discoveryStatus === "searching" ? (
-          <span className="text-xs text-warn">Scanning…</span>
+          <span className="font-mono text-xs font-bold uppercase">Scanning…</span>
         ) : null}
       </div>
 
       {discoveryStatus === "done" && devices.length === 0 ? (
-        <p className="mt-4 text-sm leading-6 text-cyan-100/65" data-testid="tv-empty">
+        <p className="mt-4 text-sm leading-6" data-testid="tv-empty">
           {isNativeAndroid()
             ? "No TVs found. Join the same Wi‑Fi as the TV (not guest), allow Nearby devices if the phone asks, then Scan again. Or type the TV IP below."
             : "No TVs found on this network. If the :5173 page on your computer lists TVs, this install is the internet copy — open that computer address on the phone and add it to the home screen. Otherwise the TV may be off, on a different Wi-Fi, or blocking mDNS."}
@@ -42,20 +42,18 @@ export function TvList() {
                   haptic();
                   selectTv(device.id);
                 }}
-                className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                  selected
-                    ? "border-accent/50 bg-accent/10"
-                    : "border-line bg-ink-soft/70 hover:bg-white/5"
+                className={`w-full border-4 border-ink px-4 py-3 text-left shadow-[4px_4px_0_#111] ${
+                  selected ? "bg-accent-strong" : "bg-paper"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="font-semibold text-white">{device.name}</p>
-                  <span className="text-xs text-cyan-100/50">
+                  <p className="font-bold uppercase">{device.name}</p>
+                  <span className="font-mono text-xs font-bold uppercase">
                     {device.connected ? "Connected" : "Not connected"}
                   </span>
                 </div>
-                <p className="mt-1 font-mono text-xs text-cyan-100/55">{device.host}</p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-cyan-100/35">
+                <p className="mt-1 font-mono text-xs">{device.host}</p>
+                <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-ink/50">
                   {device.source === "mock"
                     ? "Mock device"
                     : (device.serviceType ?? device.brand ?? "Android TV")}

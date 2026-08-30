@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { RemoteScreen } from "./RemoteScreen.js";
@@ -134,16 +134,19 @@ describe("RemoteScreen", () => {
     await user.click(screen.getByRole("button", { name: "Open keyboard" }));
     expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
-    expect(screen.getByRole("dialog", { name: "Typing preview" })).toBeVisible();
-    await user.type(screen.getByPlaceholderText("Type here…"), "hello");
+    expect(screen.queryByRole("dialog", { name: "Typing preview" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Close keyboard" })).not.toBeInTheDocument();
+    const input = screen.getByPlaceholderText("Type here…");
+    expect(input).toHaveClass("text-transparent");
+    await user.type(input, "hello");
     await waitFor(() => {
       expect(value.sendText).toHaveBeenCalledTimes(5);
     });
     expect(value.sendText).toHaveBeenNthCalledWith(1, "h");
     expect(value.sendText).toHaveBeenNthCalledWith(5, "o");
     expect(screen.queryByRole("button", { name: "Send" })).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Close keyboard" }));
-    expect(screen.queryByRole("dialog", { name: "Typing preview" })).not.toBeInTheDocument();
+    fireEvent.blur(input);
+    expect(screen.queryByPlaceholderText("Type here…")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
   });
 
@@ -159,7 +162,8 @@ describe("RemoteScreen", () => {
     expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Open keyboard" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Open keyboard" }));
-    expect(screen.getByRole("dialog", { name: "Typing preview" })).toBeVisible();
+    expect(screen.queryByRole("dialog", { name: "Typing preview" })).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Type here…")).toBeInTheDocument();
     expect(screen.getByTestId("touchpad")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Touchpad" })).toBeInTheDocument();
   });

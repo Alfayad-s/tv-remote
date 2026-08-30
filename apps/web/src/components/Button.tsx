@@ -7,15 +7,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASS: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary:
-    "bg-accent-strong text-ink shadow-[0_12px_40px_rgb(45_212_191_/_0.28)] hover:brightness-110",
-  ghost: "bg-white/6 text-cyan-50 hover:bg-white/10 border border-line",
-  danger: "bg-danger/90 text-ink hover:brightness-110",
+  primary: "bg-accent-strong text-ink",
+  ghost: "bg-paper text-ink",
+  danger: "bg-coral text-ink",
 };
 
 const SIZE_CLASS: Record<NonNullable<ButtonProps["size"]>, string> = {
-  md: "min-h-14 w-full rounded-2xl px-5 text-base",
-  sm: "min-h-9 w-auto shrink-0 rounded-full px-4 text-sm",
+  md: "min-h-14 w-full px-5 text-base",
+  sm: "min-h-9 w-auto shrink-0 px-3 text-[11px] tracking-[0.12em]",
 };
 
 export function Button({
@@ -29,7 +28,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`font-semibold tracking-wide transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 ${SIZE_CLASS[size]} ${VARIANT_CLASS[variant]} ${className}`}
+      className={`brutal-press border-[3px] border-ink font-bold uppercase shadow-[4px_4px_0_#111] disabled:cursor-not-allowed disabled:opacity-40 ${SIZE_CLASS[size]} ${VARIANT_CLASS[variant]} ${className}`}
       {...props}
     >
       {children}

@@ -17,6 +17,7 @@ export function ConnectButton({ compact = false }: { compact?: boolean }) {
       <Button
         variant="ghost"
         size={size}
+        className={compact ? "-rotate-1 font-mono shadow-[4px_4px_0_#ff5a36]" : "font-mono"}
         onClick={() => {
           haptic();
           resetApp();

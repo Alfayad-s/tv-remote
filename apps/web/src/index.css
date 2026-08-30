@@ -1,16 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "SF Pro Display", "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #071018;
-  --color-ink-soft: #0e1a27;
-  --color-glass: rgb(18 32 48 / 0.72);
-  --color-line: rgb(148 197 255 / 0.16);
-  --color-accent: #5eead4;
-  --color-accent-strong: #2dd4bf;
-  --color-warn: #fbbf24;
-  --color-danger: #fb7185;
-  --color-ok: #4ade80;
+  --font-sans: "Space Grotesk", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo Black", "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-ink: #111111;
+  --color-ink-soft: #1a1a1a;
+  --color-paper: #f3efe4;
+  --color-glass: #f3efe4;
+  --color-line: #111111;
+  --color-accent: #2a4cff;
+  --color-accent-strong: #f5e400;
+  --color-warn: #f5e400;
+  --color-danger: #ff5a36;
+  --color-ok: #1fce7a;
+  --color-coral: #ff5a36;
+  --color-blue: #2a4cff;
+  --color-green: #1fce7a;
+  --color-violet: #9a5cff;
 }
 
 html,
@@ -26,10 +33,10 @@ body {
   margin: 0;
   overflow: hidden;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgb(45 212 191 / 0.16), transparent 55%),
-    radial-gradient(900px 500px at 110% 10%, rgb(56 189 248 / 0.12), transparent 50%),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgb(255 255 255 / 0.05) 28px),
+    repeating-linear-gradient(90deg, transparent, transparent 27px, rgb(255 255 255 / 0.05) 28px),
     var(--color-ink);
-  color: #e8f4ff;
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
   text-size-adjust: 100%;
@@ -39,21 +46,30 @@ button {
   font: inherit;
 }
 
+.brutal-press {
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+
+.brutal-press:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+
 .remote-pad {
   display: flex;
   min-height: 0;
   flex: 1 1 0;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.28rem, 1dvh, 0.7rem);
+  gap: clamp(0.35rem, 1.1dvh, 0.75rem);
   width: 100%;
-  padding-block: clamp(0.1rem, 0.5dvh, 0.4rem);
+  padding-block: clamp(0.15rem, 0.5dvh, 0.4rem);
   padding-bottom: max(0.25rem, env(safe-area-inset-bottom));
 }
 
 .remote-row {
   width: 100%;
-  max-width: min(20rem, 100%);
+  max-width: min(22rem, 100%);
   flex: 0 0 auto;
 }
 
@@ -83,9 +99,9 @@ button {
 .remote-vol-row {
   display: flex;
   width: 100%;
-  max-width: min(20rem, 100%);
+  max-width: min(22rem, 100%);
   min-height: 5.75rem;
-  max-height: min(11.75rem, 30dvh);
+  max-height: min(12.5rem, 32dvh);
   flex: 0.9 1 0;
   align-items: stretch;
   justify-content: space-between;
@@ -95,13 +111,12 @@ button {
 .remote-rocker {
   display: flex;
   height: 100%;
-  width: clamp(3.35rem, 16vw, 4.4rem);
+  width: clamp(3.5rem, 17vw, 5.25rem);
   flex-direction: column;
   overflow: hidden;
-  border-radius: 999px;
-  border: 1px solid rgb(255 255 255 / 0.1);
-  background: #2c3442;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+  border: 4px solid var(--color-ink);
+  background: var(--color-paper);
+  box-shadow: 5px 5px 0 var(--color-ink);
 }
 
 .remote-key-h {

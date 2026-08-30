@@ -11,7 +11,7 @@ export function DownloadAppButton({ className = "" }: { className?: string }) {
       <button
         type="button"
         disabled={busy}
-        className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-accent-strong px-5 text-base font-semibold tracking-wide text-ink shadow-[0_12px_40px_rgb(45_212_191_/_0.28)] transition hover:brightness-110 active:scale-[0.98] disabled:opacity-60"
+        className="brutal-press flex min-h-14 w-full items-center justify-center gap-2 border-[4px] border-ink bg-accent-strong px-5 text-base font-bold uppercase tracking-wide text-ink shadow-[5px_5px_0_#111] disabled:opacity-60"
         onClick={() => {
           setBusy(true);
           setError(null);
@@ -25,7 +25,7 @@ export function DownloadAppButton({ className = "" }: { className?: string }) {
         {busy ? "Downloading…" : "Download app"}
       </button>
       {error ? (
-        <p className="text-center text-sm text-rose-200" role="alert">
+        <p className="text-center text-sm font-bold text-coral" role="alert">
           {error}
         </p>
       ) : null}

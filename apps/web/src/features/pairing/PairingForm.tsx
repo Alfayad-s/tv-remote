@@ -45,18 +45,18 @@ export function PairingForm() {
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-3xl border border-accent/30 bg-accent/10 p-[clamp(0.9rem,3vw,1.25rem)]"
+      className="flex flex-col gap-3 border-4 border-ink bg-accent-strong p-4 shadow-[5px_5px_0_#111]"
       onSubmit={onSubmit}
     >
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-accent/80">Pairing</p>
-        <h2 className="mt-2 text-xl font-semibold text-white">Enter the TV code</h2>
-        <p className="mt-2 text-sm leading-6 text-cyan-100/70">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em]">Pairing</p>
+        <h2 className="mt-2 font-display text-xl uppercase">Enter the TV code</h2>
+        <p className="mt-2 text-sm leading-6">
           Look at {tv?.name ?? "the TV"}. Type the pairing code shown on screen. It is usually 6
           characters using 0-9 and A-F.
         </p>
       </div>
-      <label className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/70">
+      <label className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
         Pairing code
         <input
           name="pin"
@@ -73,16 +73,16 @@ export function PairingForm() {
           enterKeyHint="done"
           inputMode="text"
           maxLength={16}
-          className="mt-2 min-h-14 w-full rounded-2xl border border-line bg-ink-soft/80 px-4 font-mono text-lg tracking-[0.3em] text-white outline-none placeholder:text-cyan-100/25 focus:border-accent/50"
+          className="mt-2 min-h-14 w-full border-4 border-ink bg-paper px-4 font-mono text-lg tracking-[0.3em] text-ink outline-none placeholder:text-ink/35"
         />
       </label>
       {error ? (
-        <p className="text-sm text-rose-200" role="alert">
+        <p className="text-sm font-bold text-coral" role="alert">
           {error}
         </p>
       ) : null}
       {submitting && !error ? (
-        <p className="text-sm text-cyan-100/70">Checking the code on the TV…</p>
+        <p className="text-sm">Checking the code on the TV…</p>
       ) : null}
       <Button type="submit" disabled={serviceStatus !== "open" || submitting}>
         {submitting ? "Submitting…" : "Submit PIN"}

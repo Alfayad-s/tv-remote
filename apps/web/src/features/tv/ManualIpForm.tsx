@@ -32,7 +32,7 @@ export function ManualIpForm() {
 
   return (
     <form className="flex flex-col gap-3" onSubmit={onSubmit}>
-      <label className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/70">
+      <label className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
         Manual IP
         <input
           value={value}
@@ -45,10 +45,10 @@ export function ManualIpForm() {
           autoCorrect="off"
           spellCheck={false}
           inputMode="decimal"
-          className="mt-2 min-h-14 w-full rounded-2xl border border-line bg-ink-soft/80 px-4 text-base text-white outline-none placeholder:text-cyan-100/25 focus:border-accent/50"
+          className="mt-2 min-h-14 w-full border-4 border-ink bg-paper px-4 font-sans text-base text-ink outline-none placeholder:text-ink/35"
         />
       </label>
-      {error ? <p className="text-sm text-rose-200">{error}</p> : null}
+      {error ? <p className="text-sm font-bold text-coral">{error}</p> : null}
       <Button
         type="submit"
         variant="ghost"

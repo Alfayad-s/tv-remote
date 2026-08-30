@@ -7,18 +7,18 @@ export function ConnectionStatus() {
   const name = tv?.name ?? "iFFALCON TV";
 
   return (
-    <section className="rounded-3xl border border-line bg-glass p-[clamp(0.9rem,3vw,1.25rem)] shadow-[inset_0_1px_0_rgb(255_255_255_/_0.08)] backdrop-blur-xl">
+    <section className="border-4 border-ink bg-paper p-4 shadow-[5px_5px_0_#111]">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-cyan-200/60">Television</p>
-          <h2 className="mt-2 text-xl font-semibold text-white">{name}</h2>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em]">Television</p>
+          <h2 className="mt-2 font-display text-xl uppercase">{name}</h2>
         </div>
         <StatusDot state={tvState} />
       </div>
-      <p className="mt-4 text-sm text-cyan-100/75" data-testid="tv-status">
+      <p className="mt-4 font-mono text-sm font-bold uppercase" data-testid="tv-status">
         TV: {tvStateLabel(tvState)}
       </p>
-      {tv?.host ? <p className="mt-1 font-mono text-xs text-cyan-100/45">{tv.host}</p> : null}
+      {tv?.host ? <p className="mt-1 font-mono text-xs">{tv.host}</p> : null}
     </section>
   );
 }

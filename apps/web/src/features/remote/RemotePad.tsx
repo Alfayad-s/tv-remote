@@ -39,7 +39,8 @@ function TimeKey() {
     <RemoteKey
       label="Time"
       flush
-      className="remote-key-h rounded-full"
+      tone="ok"
+      className="remote-key-h"
       onPress={() => {
         setDetailed(true);
       }}
@@ -63,8 +64,8 @@ function DPad({
 }) {
   return (
     <div className="remote-dpad relative shrink-0" aria-label="Direction pad">
-      <div className="absolute inset-0 rounded-full bg-[#3a4250] shadow-[inset_0_1px_0_rgb(255_255_255_/_0.16),0_18px_40px_rgb(0_0_0_/_0.38)]" />
-      <div className="absolute inset-[22%] rounded-full bg-[#141b24] shadow-[inset_0_2px_10px_rgb(0_0_0_/_0.55)]" />
+      <div className="absolute inset-0 rotate-[4deg] rounded-full bg-ink" />
+      <div className="absolute inset-[6px] rounded-full border-[5px] border-ink bg-paper" />
 
       <RemoteKey
         label="Up"
@@ -152,7 +153,11 @@ function Rocker({
       >
         +
       </RemoteKey>
-      <span className="py-1 text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">
+      <span
+        className={`border-y-[3px] border-ink py-2 text-center font-mono text-[11px] font-bold uppercase tracking-[0.18em] ${
+          name === "Vol" ? "bg-blue text-paper" : "bg-green text-ink"
+        }`}
+      >
         {name}
       </span>
       <RemoteKey
@@ -189,10 +194,13 @@ export function RemotePad({
         disabled={disabled}
         tone="power"
         flush
-        className="remote-power remote-key-h w-[min(7.75rem,42%)] rounded-full"
+        className="remote-power remote-key-h w-[min(14.5rem,92%)] font-display text-[15px] tracking-[0.08em]"
         onPress={press("POWER")}
       >
-        <IconPower />
+        <span className="flex items-center gap-2">
+          <IconPower />
+          Power
+        </span>
       </RemoteKey>
 
       <div className="remote-home remote-row grid grid-cols-2 gap-2 sm:gap-3">
@@ -200,7 +208,8 @@ export function RemotePad({
           label="Home"
           disabled={disabled}
           flush
-          className="remote-key-h rounded-full"
+          tone="blue"
+          className="remote-key-h"
           onPress={press("HOME")}
         >
           <span className="flex items-center gap-2">
@@ -219,7 +228,13 @@ export function RemotePad({
             disabled={disabled}
             flush
             tone="light"
-            className="remote-app-h overflow-hidden rounded-2xl p-1.5"
+            className={`remote-app-h overflow-hidden p-1.5 ${
+              app.id === "youtube"
+                ? "bg-violet text-paper"
+                : app.id === "hotstar"
+                  ? "bg-green"
+                  : "bg-paper"
+            }`}
             onPress={() => {
               launchApp(app.id);
             }}
@@ -243,7 +258,7 @@ export function RemotePad({
           label="Back"
           disabled={disabled}
           flush
-          className="remote-key-h rounded-full"
+          className="remote-key-h flex-col gap-1 font-mono text-[10.5px]"
           onPress={press("BACK")}
         >
           <span className="flex items-center gap-1.5 sm:gap-2">
@@ -255,21 +270,18 @@ export function RemotePad({
           label="Open keyboard"
           disabled={disabled}
           flush
-          className="remote-key-h rounded-full"
+          className="remote-key-h"
           onPress={() => {
-            onOpenKeyboard?.();
-          }}
+              onOpenKeyboard?.();
+            }}
         >
-          <span className="flex items-center gap-1.5 sm:gap-2">
-            <IconKeyboard />
-            <span className="hidden min-[360px]:inline">Keyboard</span>
-          </span>
+          <IconKeyboard />
         </RemoteKey>
         <RemoteKey
           label="Mute"
           disabled={disabled}
           flush
-          className="remote-key-h rounded-full"
+          className="remote-key-h flex-col gap-1 font-mono text-[10.5px]"
           onPress={press("MUTE")}
         >
           <span className="flex items-center gap-1.5 sm:gap-2">
@@ -293,7 +305,7 @@ export function RemotePad({
             label="Play pause"
             disabled={disabled}
             flush
-            className="remote-key-h w-full max-w-[6.5rem] rounded-full"
+            className="remote-key-h w-full max-w-[7.5rem] bg-accent-strong"
             onPress={press("PLAY_PAUSE")}
           >
             <IconPlayPause />

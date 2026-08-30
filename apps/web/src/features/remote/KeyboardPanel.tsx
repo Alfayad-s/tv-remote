@@ -9,16 +9,20 @@ import {
 import { MAX_SEND_TEXT_CHARS } from "@tv-remote/shared";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useConnection } from "../../hooks/useConnection.js";
-import { IconClose, IconEnter } from "./remoteIcons.js";
+import { IconEnter } from "./remoteIcons.js";
 import { diffTypedText, KEYBOARD_COMPOSING_FLUSH_MS } from "./keyboardText.js";
 
 export function KeyboardPanel({
   disabled,
   autoFocus = true,
+  hidden = false,
+  onInputBlur,
   inputRef: inputRefProp,
 }: {
   disabled: boolean;
   autoFocus?: boolean;
+  hidden?: boolean;
+  onInputBlur?: () => void;
   inputRef?: RefObject<HTMLInputElement | null>;
 }) {
   const { sendText, sendCommand } = useConnection();
@@ -104,12 +108,12 @@ export function KeyboardPanel({
 
   return (
     <form
-      className="flex min-w-0 flex-1 items-center gap-2"
+      className={hidden ? "absolute left-0 top-0 h-px w-px overflow-hidden opacity-[0.01]" : "flex min-w-0 flex-1 items-center gap-2"}
       onSubmit={onSubmit}
       aria-label="TV keyboard"
     >
       <label className="sr-only" htmlFor="tv-text">
-        Typing preview
+        TV text
       </label>
       <input
         ref={inputRef}
@@ -129,6 +133,7 @@ export function KeyboardPanel({
         }}
         onBlur={() => {
           flush();
+          onInputBlur?.();
         }}
         placeholder="Type here…"
         autoCapitalize="off"
@@ -140,16 +145,22 @@ export function KeyboardPanel({
         autoFocus={false}
         disabled={disabled}
         maxLength={MAX_SEND_TEXT_CHARS}
-        className="min-h-11 min-w-0 flex-1 rounded-2xl border border-line bg-[#fff] px-3 text-base text-ink outline-none placeholder:text-black/35 focus:border-accent/50 disabled:opacity-40 sm:min-h-12 sm:px-4"
+        className={
+          hidden
+            ? "h-px w-px border-0 bg-transparent p-0 text-transparent caret-transparent outline-none"
+            : "min-h-11 min-w-0 flex-1 border-4 border-ink bg-paper px-3 text-base text-ink outline-none placeholder:text-ink/35 disabled:opacity-40 sm:min-h-12 sm:px-4"
+        }
       />
-      <button
-        type="submit"
-        aria-label="Enter"
-        disabled={disabled}
-        className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-line bg-ink-soft text-white disabled:opacity-40 sm:size-12"
-      >
-        <IconEnter />
-      </button>
+      {hidden ? null : (
+        <button
+          type="submit"
+          aria-label="Enter"
+          disabled={disabled}
+          className="brutal-press flex size-11 shrink-0 items-center justify-center border-4 border-ink bg-accent-strong text-ink shadow-[3px_3px_0_#111] disabled:opacity-40 sm:size-12"
+        >
+          <IconEnter />
+        </button>
+      )}
     </form>
   );
 }
@@ -170,22 +181,14 @@ export function KeyboardComposer({
   }
 
   return (
-    <div
-      className="z-20 shrink-0 border-t border-line bg-[#101820] px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
-      role="dialog"
-      aria-label="Typing preview"
-    >
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-label="Close keyboard"
-          className="flex size-11 shrink-0 items-center justify-center rounded-2xl text-cyan-100/70 hover:bg-white/8 hover:text-white sm:size-12"
-          onClick={onClose}
-        >
-          <IconClose />
-        </button>
-        <KeyboardPanel disabled={disabled} autoFocus inputRef={inputRef} />
-      </div>
+    <div className="relative h-0 w-0 overflow-visible">
+      <KeyboardPanel
+        disabled={disabled}
+        autoFocus
+        hidden
+        inputRef={inputRef}
+        onInputBlur={onClose}
+      />
     </div>
   );
 }

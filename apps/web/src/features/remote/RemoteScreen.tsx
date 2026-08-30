@@ -82,17 +82,17 @@ export function RemoteScreen() {
 
   if (showRemote) {
     return (
-      <main className="flex min-h-0 flex-1 flex-col overflow-hidden px-[clamp(0.75rem,4vw,1rem)] pt-[max(0.35rem,env(safe-area-inset-top))]">
-        <div className="grid shrink-0 grid-cols-2 gap-1 rounded-full border border-line bg-ink-soft/80 p-1">
+      <main className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-5">
+        <div className="mt-1 grid shrink-0 grid-cols-2 overflow-hidden border-4 border-ink">
           {PANELS.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.id}
                 type="button"
-                className={`flex min-h-10 items-center justify-center gap-1 rounded-full px-1 text-[13px] font-semibold ${
-                  panel === item.id ? "bg-accent-strong text-ink" : "text-cyan-100/70"
-                }`}
+                className={`flex min-h-11 items-center justify-center gap-2 border-ink px-1 text-[15px] font-bold uppercase ${
+                  item.id === "touchpad" ? "border-l-4" : ""
+                } ${panel === item.id ? "bg-accent-strong" : "bg-paper"}`}
                 onClick={() => {
                   haptic();
                   setPanel(item.id);
@@ -105,14 +105,14 @@ export function RemoteScreen() {
           })}
         </div>
 
-        <div className="mt-2 flex shrink-0 items-center justify-between gap-3">
+        <div className="mt-4 flex shrink-0 items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2.5">
             <StatusDot state={tvState} />
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">
+              <p className="truncate font-display text-[15px] uppercase leading-none">
                 {tv?.name ?? "iFFALCON TV"}
               </p>
-              <p className="text-[11px] text-cyan-100/55" data-testid="tv-status">
+              <p className="mt-1 font-mono text-[10.5px] tracking-wide text-ink/60" data-testid="tv-status">
                 TV: {tvStateLabel(tvState)}
               </p>
             </div>
@@ -121,11 +121,11 @@ export function RemoteScreen() {
         </div>
 
         {needsWifiConnectionHelp(tvState) ? (
-          <p className="mt-2 shrink-0 rounded-2xl border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-rose-100">
+          <p className="mt-3 shrink-0 border-4 border-ink bg-coral px-3 py-2 text-sm font-bold text-ink">
             {WIFI_CONNECTION_HELP}
           </p>
         ) : lastError ? (
-          <p className="mt-2 shrink-0 rounded-2xl border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-rose-100">
+          <p className="mt-3 shrink-0 border-4 border-ink bg-coral px-3 py-2 text-sm font-bold text-ink">
             {lastError}
           </p>
         ) : null}
@@ -139,9 +139,12 @@ export function RemoteScreen() {
         </div>
 
         {keyboardOpen ? null : (
-          <p className="mt-2 hidden shrink-0 pb-[max(0.5rem,env(safe-area-inset-bottom))] text-center text-[11px] text-cyan-100/40 min-[400px]:block [@media(orientation:landscape)_and_(max-height:560px)]:hidden">
-            <ConnectedHint panel={panel} lastCommand={lastCommand} />
-          </p>
+          <div className="mt-4 hidden shrink-0 flex-col items-center gap-3 pb-3 min-[400px]:flex [@media(orientation:landscape)_and_(max-height:560px)]:hidden">
+            <p className="min-w-[12.5rem] bg-ink px-3.5 py-2 text-center font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-accent-strong">
+              <ConnectedHint panel={panel} lastCommand={lastCommand} />
+            </p>
+            <div className="h-1.5 w-[70px] bg-ink" />
+          </div>
         )}
 
         <KeyboardComposer
@@ -155,10 +158,10 @@ export function RemoteScreen() {
   }
 
   return (
-    <main className="flex min-h-0 flex-1 flex-col gap-[clamp(0.75rem,2.2dvh,1.25rem)] overflow-y-auto overscroll-contain px-[clamp(1rem,4.5vw,1.25rem)] pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))]">
-      <header className="shrink-0 pt-1">
-        <p className="text-xs uppercase tracking-[0.28em] text-accent/80">Personal remote</p>
-        <h1 className="mt-2 text-[clamp(1.5rem,7vw,1.875rem)] font-semibold tracking-tight text-white">
+    <main className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pb-6 pt-5">
+      <header className="shrink-0 pt-2">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em]">Personal remote</p>
+        <h1 className="mt-2 font-display text-[clamp(1.6rem,7vw,2rem)] uppercase leading-none">
           iFFALCON Remote
         </h1>
       </header>
@@ -167,7 +170,7 @@ export function RemoteScreen() {
 
       <ConnectionStatus />
 
-      <div className="flex items-center gap-2 rounded-2xl border border-line bg-ink-soft/80 px-4 py-3 text-sm text-cyan-100/70">
+      <div className="flex items-center gap-2 border-4 border-ink bg-paper px-4 py-3 text-sm font-bold">
         <StatusDot state={serviceStatus} />
         <span>{serviceStatusLabel(serviceStatus, isNativeAndroid() ? "native" : "web")}</span>
       </div>
@@ -175,11 +178,11 @@ export function RemoteScreen() {
       {!isNativeAndroid() ? <HomeNetworkCard /> : null}
 
       {needsWifiConnectionHelp(tvState) ? (
-        <p className="rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-rose-100">
+        <p className="border-4 border-ink bg-coral px-4 py-3 text-sm font-bold">
           {WIFI_CONNECTION_HELP}
         </p>
       ) : lastError ? (
-        <p className="rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-rose-100">
+        <p className="border-4 border-ink bg-coral px-4 py-3 text-sm font-bold">
           {lastError}
         </p>
       ) : null}
@@ -203,7 +206,7 @@ export function RemoteScreen() {
       <ConnectButton />
       <PairingForm />
 
-      <p className="mt-auto text-center text-xs text-cyan-100/40">
+      <p className="mt-auto text-center font-mono text-[11px] font-bold uppercase tracking-wide text-ink/55">
         {tvState === "PAIRING"
           ? "Enter the code shown on the TV to finish pairing."
           : "Connect the TV to use the remote."}
