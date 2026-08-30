@@ -34,12 +34,7 @@ export default function App() {
 
   return (
     <AppShell scroll>
-      <LandingPage
-        onOpenRemote={() => {
-          window.history.pushState({}, "", "/app");
-          setPath("/app");
-        }}
-      />
+      <LandingPage />
     </AppShell>
   );
 }

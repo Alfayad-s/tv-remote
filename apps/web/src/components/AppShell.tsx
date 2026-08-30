@@ -8,16 +8,27 @@ export function AppShell({
   scroll?: boolean;
 }) {
   return (
-    <div className="flex h-dvh max-h-dvh w-full justify-center px-3 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="flex h-dvh max-h-dvh w-full justify-center px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div
-        className={`relative mt-2 w-full max-w-[430px] border-[5px] border-ink bg-paper shadow-[10px_10px_0_#111] ${
-          scroll ? "overflow-y-auto overscroll-contain" : "flex min-h-0 flex-col overflow-hidden"
+        className={`flex w-full max-w-[430px] flex-col border-[5px] border-ink bg-paper shadow-[8px_8px_0_#111] ${
+          scroll ? "min-h-0 overflow-hidden" : "min-h-0 overflow-hidden"
         }`}
       >
-        <span className="absolute -top-3.5 left-4 z-10 bg-ink px-2.5 py-1 font-mono text-[11px] font-bold tracking-[0.18em] text-paper">
-          REMOTE.APP
-        </span>
-        {children}
+        <header className="flex shrink-0 items-center justify-between border-b-[5px] border-ink bg-ink px-4 py-2.5">
+          <span className="font-mono text-[11px] font-bold tracking-[0.2em] text-paper">
+            REMOTE.APP
+          </span>
+          <span className="size-2.5 shrink-0 bg-accent-strong" aria-hidden="true" />
+        </header>
+        <div
+          className={
+            scroll
+              ? "min-h-0 flex-1 overflow-y-auto overscroll-contain"
+              : "flex min-h-0 flex-1 flex-col overflow-hidden"
+          }
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

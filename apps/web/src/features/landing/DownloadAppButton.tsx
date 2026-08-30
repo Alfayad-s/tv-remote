@@ -2,16 +2,26 @@ import { useState } from "react";
 import { Download } from "lucide-react";
 import { downloadAndroidApk } from "../../utils/downloadAndroidApk.js";
 
-export function DownloadAppButton({ className = "" }: { className?: string }) {
+export function DownloadAppButton({
+  className = "",
+  variant = "yellow",
+}: {
+  className?: string;
+  variant?: "yellow" | "ink";
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const tone =
+    variant === "ink"
+      ? "bg-ink text-paper shadow-[5px_5px_0_#ff5a36]"
+      : "bg-accent-strong text-ink shadow-[5px_5px_0_#111]";
 
   return (
     <div className={`flex w-full flex-col gap-2 ${className}`}>
       <button
         type="button"
         disabled={busy}
-        className="brutal-press flex min-h-14 w-full items-center justify-center gap-2 border-[4px] border-ink bg-accent-strong px-5 text-base font-bold uppercase tracking-wide text-ink shadow-[5px_5px_0_#111] disabled:opacity-60"
+        className={`brutal-press flex min-h-14 w-full items-center justify-center gap-2 border-[4px] border-ink px-5 text-base font-bold uppercase tracking-wide disabled:opacity-60 ${tone}`}
         onClick={() => {
           setBusy(true);
           setError(null);

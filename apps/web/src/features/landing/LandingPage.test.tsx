@@ -1,18 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { LandingPage } from "./LandingPage.js";
 
 describe("LandingPage", () => {
-  it("offers the Android app download and opens the web remote", async () => {
-    const user = userEvent.setup();
-    const onOpenRemote = vi.fn();
-    render(<LandingPage onOpenRemote={onOpenRemote} />);
+  it("offers the Android app download and not a web remote", () => {
+    render(<LandingPage />);
 
-    const download = screen.getByRole("button", { name: "Download app" });
-    expect(download).toBeEnabled();
-
-    await user.click(screen.getByRole("button", { name: "Open web remote" }));
-    expect(onOpenRemote).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Download app" })).toBeEnabled();
+    expect(screen.getByRole("heading", { name: /TV\s+Remote/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open web remote" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/open the web remote/i)).not.toBeInTheDocument();
   });
 });
