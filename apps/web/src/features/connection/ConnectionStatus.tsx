@@ -4,7 +4,7 @@ import { tvStateLabel } from "../../utils/labels.js";
 
 export function ConnectionStatus() {
   const { tv, tvState } = useConnection();
-  const name = tv?.name ?? "iFFALCON TV";
+  const name = tv?.name ?? "Android TV";
 
   return (
     <section className="border-4 border-ink bg-paper p-4 shadow-[5px_5px_0_#111]">

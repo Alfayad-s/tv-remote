@@ -110,7 +110,7 @@ export function RemoteScreen() {
             <StatusDot state={tvState} />
             <div className="min-w-0">
               <p className="truncate font-display text-[15px] uppercase leading-none">
-                {tv?.name ?? "iFFALCON TV"}
+                {tv?.name ?? "Android TV"}
               </p>
               <p className="mt-1 font-mono text-[10.5px] tracking-wide text-ink/60" data-testid="tv-status">
                 TV: {tvStateLabel(tvState)}
@@ -162,7 +162,7 @@ export function RemoteScreen() {
       <header className="shrink-0 pt-2">
         <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em]">Personal remote</p>
         <h1 className="mt-2 font-display text-[clamp(1.6rem,7vw,2rem)] uppercase leading-none">
-          iFFALCON Remote
+          TV Remote
         </h1>
       </header>
 

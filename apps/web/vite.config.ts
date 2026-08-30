@@ -92,9 +92,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "iFFALCON Remote",
+        name: "TV Remote",
         short_name: "TV Remote",
-        description: "Personal remote control for iFFALCON Android TV",
+        description: "Phone remote for Android TV",
         theme_color: "#111111",
         background_color: "#111111",
         display: "standalone",

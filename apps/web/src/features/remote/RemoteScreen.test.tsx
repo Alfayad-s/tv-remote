@@ -48,7 +48,7 @@ function renderRemote(overrides: Partial<ConnectionStore> = {}) {
 describe("RemoteScreen", () => {
   it("shows the disconnected TV state", () => {
     renderRemote();
-    expect(screen.getByText("iFFALCON Remote")).toBeInTheDocument();
+    expect(screen.getByText("TV Remote")).toBeInTheDocument();
     expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Not connected");
     expect(screen.getByRole("button", { name: "Connect TV" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Download app" })).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe("RemoteScreen", () => {
     });
 
     expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Connected");
-    expect(screen.queryByText("iFFALCON Remote")).not.toBeInTheDocument();
+    expect(screen.queryByText("TV Remote")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Disconnect" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Disconnect" }));
@@ -98,7 +98,7 @@ describe("RemoteScreen", () => {
     expect(screen.getByRole("button", { name: "Remote" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Reset" })).toBeInTheDocument();
-    expect(screen.queryByText("iFFALCON Remote")).not.toBeInTheDocument();
+    expect(screen.queryByText("TV Remote")).not.toBeInTheDocument();
     expect(screen.getByTestId("tv-status")).toHaveTextContent("TV: Connecting");
   });
 

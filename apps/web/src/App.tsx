@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AppShell } from "./components/AppShell.js";
+import { ContactPage } from "./features/landing/ContactPage.js";
 import { LandingPage } from "./features/landing/LandingPage.js";
 import { RemoteScreen } from "./features/remote/RemoteScreen.js";
 import { isNativeAndroid } from "./native/platform.js";
@@ -7,6 +8,10 @@ import { ConnectionProvider } from "./store/ConnectionProvider.js";
 
 function isRemotePath(pathname: string): boolean {
   return pathname === "/app" || pathname.startsWith("/app/");
+}
+
+function isContactPath(pathname: string): boolean {
+  return pathname === "/contact" || pathname.startsWith("/contact/");
 }
 
 export default function App() {
@@ -22,6 +27,11 @@ export default function App() {
     };
   }, []);
 
+  const go = (next: string): void => {
+    window.history.pushState({}, "", next);
+    setPath(next);
+  };
+
   if (isNativeAndroid() || isRemotePath(path)) {
     return (
       <ConnectionProvider>
@@ -34,7 +44,7 @@ export default function App() {
 
   return (
     <AppShell scroll>
-      <LandingPage />
+      {isContactPath(path) ? <ContactPage onGo={go} /> : <LandingPage onGo={go} />}
     </AppShell>
   );
 }
