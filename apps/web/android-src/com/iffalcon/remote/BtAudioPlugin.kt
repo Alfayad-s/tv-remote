@@ -1,6 +1,7 @@
 package com.iffalcon.remote
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.database.ContentObserver
 import android.media.AudioDeviceCallback
@@ -142,19 +143,22 @@ class BtAudioPlugin : Plugin() {
     call.resolve()
   }
 
+  /**
+   * Tries the real effect panel first and the sound settings screen second. Launching is attempted
+   * rather than pre-checked, because package visibility can hide a target that still starts fine.
+   */
   @PluginMethod
   fun openSystemEqualizer(call: PluginCall) {
-    val intent =
-      Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
-        .putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.packageName)
-        .putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    if (intent.resolveActivity(context.packageManager) == null) {
-      call.reject("This phone has no equalizer app.")
-      return
+    for (intent in listOf(effectPanelIntent(), soundSettingsIntent())) {
+      try {
+        context.startActivity(intent)
+        call.resolve()
+        return
+      } catch (error: ActivityNotFoundException) {
+        continue
+      }
     }
-    context.startActivity(intent)
-    call.resolve()
+    call.reject("No equalizer on this phone. Use the one inside your music app.")
   }
 
   @PluginMethod
@@ -178,8 +182,29 @@ class BtAudioPlugin : Plugin() {
     data.put("volume", volume)
     data.put("maxVolume", audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
     data.put("muted", volumeBeforeMute != null || audio.isStreamMute(AudioManager.STREAM_MUSIC))
+    data.put("toneTarget", toneTarget())
     return data
   }
+
+  private fun effectPanelIntent(): Intent =
+    Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL)
+      .putExtra(AudioEffect.EXTRA_PACKAGE_NAME, context.packageName)
+      .putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MUSIC)
+      .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+  private fun soundSettingsIntent(): Intent =
+    Intent(Settings.ACTION_SOUND_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+  /** "effects" when a real equalizer answers, "sound" for the settings fallback, null for neither. */
+  private fun toneTarget(): String? =
+    when {
+      canResolve(effectPanelIntent()) -> "effects"
+      canResolve(soundSettingsIntent()) -> "sound"
+      else -> null
+    }
+
+  private fun canResolve(intent: Intent): Boolean =
+    intent.resolveActivity(context.packageManager) != null
 
   private fun connectedSpeaker(): AudioDeviceInfo? =
     audio.getDevices(AudioManager.GET_DEVICES_OUTPUTS).firstOrNull { device ->

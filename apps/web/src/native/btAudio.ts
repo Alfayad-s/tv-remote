@@ -1,11 +1,15 @@
 import { registerPlugin, type PluginListenerHandle } from "@capacitor/core";
 
+/** Where tone control lives on this phone: a real effect panel, the settings screen, or nowhere. */
+export type ToneTarget = "effects" | "sound" | null;
+
 export interface SpeakerState {
   connected: boolean;
   deviceName: string | null;
   volume: number;
   maxVolume: number;
   muted: boolean;
+  toneTarget: ToneTarget;
 }
 
 export interface BtAudioPlugin {
@@ -31,4 +35,5 @@ export const IDLE_SPEAKER_STATE: SpeakerState = {
   volume: 0,
   maxVolume: 15,
   muted: false,
+  toneTarget: null,
 };

@@ -132,12 +132,18 @@ export function SpeakerScreen({ onBack }: { onBack: () => void }) {
 
           <div className="border-t-4 border-dashed border-ink/25 pt-4">
             <p className="mb-3 text-sm font-bold">
-              Bass and treble live in the phone&rsquo;s own equalizer. Apps cannot reach them once
-              the sound leaves over Bluetooth.
+              Bass and treble cannot reach the speaker over Bluetooth. Shape the sound on the phone
+              instead.
             </p>
-            <Button variant="ghost" onClick={openSystemEqualizer}>
-              System equalizer
-            </Button>
+            {state.toneTarget ? (
+              <Button variant="ghost" onClick={openSystemEqualizer}>
+                {state.toneTarget === "effects" ? "System equalizer" : "Sound settings"}
+              </Button>
+            ) : (
+              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-ink/60">
+                This phone has no equalizer of its own. Use the one inside your music app.
+              </p>
+            )}
           </div>
         </>
       )}

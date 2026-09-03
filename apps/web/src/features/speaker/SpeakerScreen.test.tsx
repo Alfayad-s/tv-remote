@@ -35,6 +35,7 @@ const CONNECTED: SpeakerState = {
   volume: 6,
   maxVolume: 15,
   muted: false,
+  toneTarget: "effects",
 };
 
 async function renderSpeaker(state: Partial<SpeakerState> = {}) {
@@ -102,6 +103,23 @@ describe("SpeakerScreen", () => {
     expect(screen.queryByLabelText("Treble")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "System equalizer" }));
     expect(plugin.openSystemEqualizer).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers sound settings when the phone has no effect panel", async () => {
+    const user = userEvent.setup();
+    await renderSpeaker({ toneTarget: "sound" });
+
+    expect(screen.queryByRole("button", { name: "System equalizer" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Sound settings" }));
+    expect(plugin.openSystemEqualizer).toHaveBeenCalledTimes(1);
+  });
+
+  it("points at the music app when the phone has no equalizer at all", async () => {
+    await renderSpeaker({ toneTarget: null });
+
+    expect(screen.queryByRole("button", { name: "System equalizer" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Sound settings" })).not.toBeInTheDocument();
+    expect(screen.getByText(/use the one inside your music app/i)).toBeInTheDocument();
   });
 
   it("unmutes by restoring the volume rather than toggling a flag", async () => {
