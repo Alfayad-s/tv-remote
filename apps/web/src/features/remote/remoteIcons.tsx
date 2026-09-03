@@ -15,6 +15,7 @@ import {
   Rewind,
   SkipBack,
   SkipForward,
+  Speaker,
   Undo2,
   VolumeX,
   X,
@@ -103,4 +104,8 @@ export function IconTabRemote(): ReactNode {
 
 export function IconTabTouchpad(): ReactNode {
   return <RemoteIcon icon={Pointer} size="size-4" />;
+}
+
+export function IconSpeaker(): ReactNode {
+  return <RemoteIcon icon={Speaker} />;
 }

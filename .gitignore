@@ -10,6 +10,7 @@ data/credentials/*
 apps/server/data/
 *.log
 .DS_Store
+.idea
 .vite
 *.tsbuildinfo
 .eslintcache

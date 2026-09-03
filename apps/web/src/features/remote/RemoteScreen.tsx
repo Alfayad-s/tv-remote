@@ -19,7 +19,7 @@ import {
 } from "../../utils/labels.js";
 import { KeyboardComposer } from "./KeyboardPanel.js";
 import { RemotePad } from "./RemotePad.js";
-import { IconTabRemote, IconTabTouchpad } from "./remoteIcons.js";
+import { IconSpeaker, IconTabRemote, IconTabTouchpad } from "./remoteIcons.js";
 import { TouchPad } from "./TouchPad.js";
 
 type RemotePanel = "remote" | "touchpad";
@@ -39,7 +39,7 @@ function ConnectedHint({ panel, lastCommand }: { panel: RemotePanel; lastCommand
   return <>Hold arrows or volume to repeat.</>;
 }
 
-export function RemoteScreen() {
+export function RemoteScreen({ onOpenSpeaker }: { onOpenSpeaker?: () => void } = {}) {
   const {
     serviceStatus,
     tv,
@@ -205,6 +205,23 @@ export function RemoteScreen() {
       <ManualIpForm />
       <ConnectButton />
       <PairingForm />
+
+      {onOpenSpeaker ? (
+        <div className="border-t-4 border-dashed border-ink/25 pt-4">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              haptic();
+              onOpenSpeaker();
+            }}
+          >
+            <span className="flex items-center justify-center gap-2">
+              <IconSpeaker />
+              Speaker remote
+            </span>
+          </Button>
+        </div>
+      ) : null}
 
       <p className="mt-auto text-center font-mono text-[11px] font-bold uppercase tracking-wide text-ink/55">
         {tvState === "PAIRING"

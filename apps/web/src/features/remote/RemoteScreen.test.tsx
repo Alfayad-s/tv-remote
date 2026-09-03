@@ -15,7 +15,10 @@ const mockTv = {
   source: "mock" as const,
 };
 
-function renderRemote(overrides: Partial<ConnectionStore> = {}) {
+function renderRemote(
+  overrides: Partial<ConnectionStore> = {},
+  props: { onOpenSpeaker?: () => void } = {},
+) {
   const value: ConnectionStore = {
     serviceStatus: "open",
     tvState: "DISCONNECTED",
@@ -42,7 +45,7 @@ function renderRemote(overrides: Partial<ConnectionStore> = {}) {
     return <ConnectionContext.Provider value={value}>{children}</ConnectionContext.Provider>;
   }
 
-  return { ...render(<RemoteScreen />, { wrapper: Wrapper }), value };
+  return { ...render(<RemoteScreen {...props} />, { wrapper: Wrapper }), value };
 }
 
 describe("RemoteScreen", () => {
@@ -200,6 +203,20 @@ describe("RemoteScreen", () => {
     renderRemote({ devices: [], selectedTvId: null });
     expect(screen.getByTestId("tv-empty")).toHaveTextContent("No TVs found");
     expect(screen.getByRole("button", { name: "Connect TV" })).toBeDisabled();
+  });
+
+  it("opens the speaker remote without a TV connection", async () => {
+    const user = userEvent.setup();
+    const onOpenSpeaker = vi.fn();
+    renderRemote({}, { onOpenSpeaker });
+
+    await user.click(screen.getByRole("button", { name: "Speaker remote" }));
+    expect(onOpenSpeaker).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides the speaker remote when the host does not offer it", () => {
+    renderRemote();
+    expect(screen.queryByRole("button", { name: "Speaker remote" })).not.toBeInTheDocument();
   });
 
   it("connects with a typed IP address", async () => {

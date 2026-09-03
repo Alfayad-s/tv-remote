@@ -8,6 +8,7 @@ public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     registerPlugin(AndroidTvPlugin.class);
+    registerPlugin(BtAudioPlugin.class);
     super.onCreate(savedInstanceState);
     getOnBackPressedDispatcher()
         .addCallback(

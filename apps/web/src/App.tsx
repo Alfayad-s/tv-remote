@@ -3,6 +3,7 @@ import { AppShell } from "./components/AppShell.js";
 import { ContactPage } from "./features/landing/ContactPage.js";
 import { LandingPage } from "./features/landing/LandingPage.js";
 import { RemoteScreen } from "./features/remote/RemoteScreen.js";
+import { SpeakerScreen } from "./features/speaker/SpeakerScreen.js";
 import { isNativeAndroid } from "./native/platform.js";
 import { ConnectionProvider } from "./store/ConnectionProvider.js";
 
@@ -16,6 +17,7 @@ function isContactPath(pathname: string): boolean {
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname);
+  const [screen, setScreen] = useState<"remote" | "speaker">("remote");
 
   useEffect(() => {
     const onPop = (): void => {
@@ -32,11 +34,24 @@ export default function App() {
     setPath(next);
   };
 
+  // ConnectionProvider stays mounted across both screens; unmounting it drops the TV session.
   if (isNativeAndroid() || isRemotePath(path)) {
     return (
       <ConnectionProvider>
         <AppShell immersive={isNativeAndroid()}>
-          <RemoteScreen />
+          {screen === "speaker" ? (
+            <SpeakerScreen
+              onBack={() => {
+                setScreen("remote");
+              }}
+            />
+          ) : (
+            <RemoteScreen
+              onOpenSpeaker={() => {
+                setScreen("speaker");
+              }}
+            />
+          )}
         </AppShell>
       </ConnectionProvider>
     );
