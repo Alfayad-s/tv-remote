@@ -14,8 +14,6 @@ const { native, plugin } = vi.hoisted(() => ({
     adjustVolume: vi.fn(),
     setMuted: vi.fn(),
     mediaKey: vi.fn(),
-    setBass: vi.fn(),
-    setTreble: vi.fn(),
     openSystemEqualizer: vi.fn(),
     openBluetoothSettings: vi.fn(),
     addListener: vi.fn(),
@@ -37,22 +35,12 @@ const CONNECTED: SpeakerState = {
   volume: 6,
   maxVolume: 15,
   muted: false,
-  bass: 50,
-  treble: 50,
-  bassSupported: true,
-  trebleSupported: true,
 };
 
 async function renderSpeaker(state: Partial<SpeakerState> = {}) {
   const resolved = { ...CONNECTED, ...state };
   plugin.requestBluetoothName.mockResolvedValue(resolved);
-  for (const method of [
-    plugin.setVolume,
-    plugin.adjustVolume,
-    plugin.setMuted,
-    plugin.setBass,
-    plugin.setTreble,
-  ]) {
+  for (const method of [plugin.setVolume, plugin.adjustVolume, plugin.setMuted]) {
     method.mockResolvedValue(resolved);
   }
   plugin.mediaKey.mockResolvedValue(undefined);
@@ -86,7 +74,7 @@ describe("SpeakerScreen", () => {
     expect(screen.getByText("Bluetooth speaker")).toBeInTheDocument();
   });
 
-  it("sends the six speaker controls", async () => {
+  it("sends the volume, mute and track controls", async () => {
     const user = userEvent.setup();
     await renderSpeaker();
 
@@ -102,20 +90,27 @@ describe("SpeakerScreen", () => {
     await user.click(screen.getByRole("button", { name: "Previous track" }));
     expect(plugin.mediaKey).toHaveBeenCalledWith({ key: "previous" });
 
-    fireEvent.change(screen.getByLabelText("Bass"), { target: { value: "70" } });
-    expect(plugin.setBass).toHaveBeenCalledWith({ level: 70 });
-
-    fireEvent.change(screen.getByLabelText("Treble"), { target: { value: "30" } });
-    expect(plugin.setTreble).toHaveBeenCalledWith({ level: 30 });
+    fireEvent.change(screen.getByLabelText("Volume"), { target: { value: "12" } });
+    expect(plugin.setVolume).toHaveBeenCalledWith({ level: 12 });
   });
 
-  it("offers the system equalizer when the phone blocks audio effects", async () => {
+  it("sends tone control to the system equalizer instead of faking its own", async () => {
     const user = userEvent.setup();
-    await renderSpeaker({ bassSupported: false, trebleSupported: false });
+    await renderSpeaker();
 
     expect(screen.queryByLabelText("Bass")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Treble")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "System equalizer" }));
     expect(plugin.openSystemEqualizer).toHaveBeenCalledTimes(1);
+  });
+
+  it("unmutes by restoring the volume rather than toggling a flag", async () => {
+    const user = userEvent.setup();
+    await renderSpeaker({ muted: true, volume: 0 });
+
+    expect(screen.getByTestId("speaker-volume")).toHaveTextContent("Muted");
+    await user.click(screen.getByRole("button", { name: "Unmute" }));
+    expect(plugin.setMuted).toHaveBeenCalledWith({ muted: false });
   });
 
   it("sends the user to Android settings when no speaker is connected", async () => {

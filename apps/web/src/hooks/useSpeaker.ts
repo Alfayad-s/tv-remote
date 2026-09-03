@@ -12,8 +12,6 @@ export interface SpeakerStore {
   adjustVolume: (direction: "up" | "down") => void;
   toggleMute: () => void;
   skip: (key: "next" | "previous") => void;
-  setBass: (level: number) => void;
-  setTreble: (level: number) => void;
   openSystemEqualizer: () => void;
   openBluetoothSettings: () => void;
 }
@@ -111,13 +109,6 @@ export function useSpeaker(): SpeakerStore {
         muted: !state.muted,
       }),
     skip: (key) => run(() => BtAudio.mediaKey({ key }), "Could not send the track command."),
-    setBass: (level) =>
-      run(() => BtAudio.setBass({ level }), "Could not change the bass.", { ...state, bass: level }),
-    setTreble: (level) =>
-      run(() => BtAudio.setTreble({ level }), "Could not change the treble.", {
-        ...state,
-        treble: level,
-      }),
     openSystemEqualizer: () =>
       run(() => BtAudio.openSystemEqualizer(), "This phone has no equalizer app."),
     openBluetoothSettings: () =>

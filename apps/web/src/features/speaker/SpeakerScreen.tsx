@@ -1,43 +1,9 @@
 import { Bluetooth, SkipBack, SkipForward, Volume1, Volume2, VolumeX } from "lucide-react";
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent } from "react";
 import { Button } from "../../components/Button.js";
 import { useHaptics } from "../../hooks/useHaptics.js";
 import { useSpeaker } from "../../hooks/useSpeaker.js";
 import { RemoteKey } from "../remote/RemoteKey.js";
-
-function ToneSlider({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (next: number) => void;
-}): ReactNode {
-  const haptic = useHaptics();
-
-  return (
-    <label className="block border-4 border-ink bg-paper p-4 shadow-[4px_4px_0_#111]">
-      <span className="flex items-baseline justify-between font-mono text-[11px] font-bold uppercase tracking-[0.18em]">
-        {label}
-        <span>{value === 50 ? "Flat" : `${value > 50 ? "+" : "−"}${String(Math.abs(value - 50))}`}</span>
-      </span>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={5}
-        value={value}
-        aria-label={label}
-        className="mt-3 h-2 w-full appearance-none border-2 border-ink bg-accent-strong accent-ink"
-        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-          haptic();
-          onChange(Number(event.target.value));
-        }}
-      />
-    </label>
-  );
-}
 
 export function SpeakerScreen({ onBack }: { onBack: () => void }) {
   const haptic = useHaptics();
@@ -50,14 +16,11 @@ export function SpeakerScreen({ onBack }: { onBack: () => void }) {
     adjustVolume,
     toggleMute,
     skip,
-    setBass,
-    setTreble,
     openSystemEqualizer,
     openBluetoothSettings,
   } = useSpeaker();
 
   const percent = state.maxVolume > 0 ? Math.round((state.volume / state.maxVolume) * 100) : 0;
-  const showTone = state.bassSupported || state.trebleSupported;
 
   const back = (): void => {
     haptic();
@@ -167,22 +130,15 @@ export function SpeakerScreen({ onBack }: { onBack: () => void }) {
             </RemoteKey>
           </div>
 
-          {state.bassSupported ? (
-            <ToneSlider label="Bass" value={state.bass} onChange={setBass} />
-          ) : null}
-          {state.trebleSupported ? (
-            <ToneSlider label="Treble" value={state.treble} onChange={setTreble} />
-          ) : null}
-          {!showTone && ready ? (
-            <>
-              <p className="border-4 border-ink bg-paper px-4 py-3 text-sm font-bold">
-                This phone does not let apps change bass or treble. Its own equalizer still works.
-              </p>
-              <Button variant="ghost" onClick={openSystemEqualizer}>
-                System equalizer
-              </Button>
-            </>
-          ) : null}
+          <div className="border-t-4 border-dashed border-ink/25 pt-4">
+            <p className="mb-3 text-sm font-bold">
+              Bass and treble live in the phone&rsquo;s own equalizer. Apps cannot reach them once
+              the sound leaves over Bluetooth.
+            </p>
+            <Button variant="ghost" onClick={openSystemEqualizer}>
+              System equalizer
+            </Button>
+          </div>
         </>
       )}
 

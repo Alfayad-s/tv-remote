@@ -7,8 +7,6 @@ import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.audiofx.AudioEffect
-import android.media.audiofx.BassBoost
-import android.media.audiofx.Equalizer
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -27,6 +25,11 @@ import com.getcapacitor.annotation.PermissionCallback
  * Remote for the Bluetooth speaker the phone is already playing to. Android gives apps no way to
  * open an A2DP connection, so this only ever attaches to the current output route and hands the
  * user off to system settings when nothing is connected.
+ *
+ * Tone control is deliberately absent. Equalizer and BassBoost attach to the phone's primary output
+ * mix, which is bypassed when audio leaves over A2DP, so the effects construct fine and then do
+ * nothing. The phone's own equalizer sits deeper in the pipeline and does survive the hop, so
+ * [openSystemEqualizer] hands the user there instead.
  */
 @CapacitorPlugin(
   name = "BtAudio",
@@ -37,21 +40,12 @@ class BtAudioPlugin : Plugin() {
   private lateinit var audio: AudioManager
   private val handler = Handler(Looper.getMainLooper())
 
-  private var equalizer: Equalizer? = null
-  private var bassBoost: BassBoost? = null
-  private var bassBands: List<Short> = emptyList()
-  private var trebleBands: List<Short> = emptyList()
-  private var minBandLevel: Short = 0
-  private var maxBandLevel: Short = 0
-  private var bass = FLAT
-  private var treble = FLAT
-
+  private var volumeBeforeMute: Int? = null
   private var deviceCallback: AudioDeviceCallback? = null
   private var volumeObserver: ContentObserver? = null
 
   override fun load() {
     audio = context.getSystemService(AudioManager::class.java)
-    createEffects()
     watchForChanges()
   }
 
@@ -60,10 +54,6 @@ class BtAudioPlugin : Plugin() {
     volumeObserver?.let { context.contentResolver.unregisterContentObserver(it) }
     deviceCallback = null
     volumeObserver = null
-    equalizer?.release()
-    bassBoost?.release()
-    equalizer = null
-    bassBoost = null
   }
 
   @PluginMethod
@@ -113,11 +103,25 @@ class BtAudioPlugin : Plugin() {
     call.resolve(state())
   }
 
+  /**
+   * Drops the stream to zero instead of using ADJUST_MUTE. Absolute volume forwards a level of 0
+   * to the speaker over AVRCP, while a stream mute flag often never leaves the phone.
+   */
   @PluginMethod
   fun setMuted(call: PluginCall) {
-    val muted = call.getBoolean("muted") ?: false
-    val direction = if (muted) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE
-    audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, 0)
+    if (call.getBoolean("muted") == true) {
+      val current = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
+      if (current > 0) {
+        volumeBeforeMute = current
+      }
+      audio.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0)
+    } else {
+      val restore =
+        volumeBeforeMute
+          ?: (audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC) / 4).coerceAtLeast(1)
+      volumeBeforeMute = null
+      audio.setStreamVolume(AudioManager.STREAM_MUSIC, restore, 0)
+    }
     call.resolve(state())
   }
 
@@ -136,32 +140,6 @@ class BtAudioPlugin : Plugin() {
     audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, code))
     audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, code))
     call.resolve()
-  }
-
-  @PluginMethod
-  fun setBass(call: PluginCall) {
-    val level = call.getInt("level")
-    if (level == null) {
-      call.reject("Missing bass level.")
-      return
-    }
-    bass = level.coerceIn(0, 100)
-    val strength = if (bass <= FLAT) 0 else (bass - FLAT) * 20
-    bassBoost?.let { effect -> runCatching { effect.setStrength(strength.toShort()) } }
-    applyBands(bassBands, bass)
-    call.resolve(state())
-  }
-
-  @PluginMethod
-  fun setTreble(call: PluginCall) {
-    val level = call.getInt("level")
-    if (level == null) {
-      call.reject("Missing treble level.")
-      return
-    }
-    treble = level.coerceIn(0, 100)
-    applyBands(trebleBands, treble)
-    call.resolve(state())
   }
 
   @PluginMethod
@@ -189,16 +167,17 @@ class BtAudioPlugin : Plugin() {
 
   private fun state(): JSObject {
     val speaker = connectedSpeaker()
+    val volume = audio.getStreamVolume(AudioManager.STREAM_MUSIC)
+    if (volume > 0) {
+      // The hardware keys or another app turned it back up, so the mute is over.
+      volumeBeforeMute = null
+    }
     val data = JSObject()
     data.put("connected", speaker != null)
     data.put("deviceName", speakerName(speaker))
-    data.put("volume", audio.getStreamVolume(AudioManager.STREAM_MUSIC))
+    data.put("volume", volume)
     data.put("maxVolume", audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
-    data.put("muted", audio.isStreamMute(AudioManager.STREAM_MUSIC))
-    data.put("bass", bass)
-    data.put("treble", treble)
-    data.put("bassSupported", bassBoost != null || bassBands.isNotEmpty())
-    data.put("trebleSupported", trebleBands.isNotEmpty())
+    data.put("muted", volumeBeforeMute != null || audio.isStreamMute(AudioManager.STREAM_MUSIC))
     return data
   }
 
@@ -217,35 +196,6 @@ class BtAudioPlugin : Plugin() {
       return null
     }
     return device.productName?.toString()?.takeIf { it.isNotBlank() }
-  }
-
-  private fun createEffects() {
-    equalizer = runCatching { Equalizer(0, 0).apply { enabled = true } }.getOrNull()
-    equalizer?.let { effect ->
-      runCatching {
-        val range = effect.bandLevelRange
-        minBandLevel = range[0]
-        maxBandLevel = range[1]
-        val count = effect.numberOfBands.toInt()
-        val span = maxOf(1, count / 3)
-        bassBands = (0 until span).map { it.toShort() }
-        trebleBands = ((count - span) until count).map { it.toShort() }
-      }
-    }
-    bassBoost = runCatching { BassBoost(0, 0).apply { enabled = true } }.getOrNull()
-  }
-
-  private fun applyBands(bands: List<Short>, level: Int) {
-    val effect = equalizer ?: return
-    val offset =
-      if (level >= FLAT) {
-        (level - FLAT) / FLAT.toFloat() * maxBandLevel
-      } else {
-        (FLAT - level) / FLAT.toFloat() * minBandLevel
-      }
-    for (band in bands) {
-      runCatching { effect.setBandLevel(band, offset.toInt().toShort()) }
-    }
   }
 
   private fun watchForChanges() {
@@ -268,10 +218,5 @@ class BtAudioPlugin : Plugin() {
 
   private fun emitState() {
     notifyListeners("state", state())
-  }
-
-  private companion object {
-    /** Midpoint of the 0-100 bass and treble sliders, where no gain is applied. */
-    const val FLAT = 50
   }
 }
