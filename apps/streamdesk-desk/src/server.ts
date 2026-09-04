@@ -31,11 +31,14 @@ interface Session {
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 function loadDeskHtml(): string {
+  const fromEnv = process.env.STREAMDESK_DESK_HTML?.trim();
   const candidates = [
+    fromEnv,
     join(HERE, "desk.html"),
     join(process.cwd(), "desk.html"),
     join(HERE, "src", "desk.html"),
-  ];
+    typeof process.resourcesPath === "string" ? join(process.resourcesPath, "desk.html") : "",
+  ].filter((path): path is string => Boolean(path));
   for (const path of candidates) {
     if (existsSync(path)) {
       return readFileSync(path, "utf8");
@@ -44,7 +47,14 @@ function loadDeskHtml(): string {
   throw new Error("desk.html not found next to the StreamDesk Desk binary.");
 }
 
-const DESK_HTML = loadDeskHtml();
+let deskHtmlCache: string | null = null;
+
+function deskHtml(): string {
+  if (!deskHtmlCache) {
+    deskHtmlCache = loadDeskHtml();
+  }
+  return deskHtmlCache;
+}
 
 function send(socket: WebSocket, message: ServerMessage): void {
   if (socket.readyState === socket.OPEN) {
@@ -98,6 +108,8 @@ function json(res: ServerResponse, status: number, body: unknown): void {
 export async function startDeskServer(port = STREAMDESK_DEFAULT_PORT): Promise<{
   port: number;
   getPin: () => string;
+  rotatePin: () => void;
+  getConnectedCount: () => number;
   stop: () => void;
 }> {
   let pin = createPairingPin();
@@ -172,6 +184,8 @@ export async function startDeskServer(port = STREAMDESK_DEFAULT_PORT): Promise<{
   return {
     port,
     getPin: () => pin,
+    rotatePin,
+    getConnectedCount: () => [...sessions].filter((session) => session.authenticated).length,
     stop: () => {
       service.stop();
       bonjour.destroy();
@@ -194,7 +208,7 @@ async function handleHttp(
   try {
     if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/desk")) {
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      res.end(DESK_HTML);
+      res.end(deskHtml());
       return;
     }
 

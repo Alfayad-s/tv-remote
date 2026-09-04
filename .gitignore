@@ -17,6 +17,10 @@ apps/server/data/
 apps/web/public/downloads/*.apk
 !apps/web/public/downloads/iffalcon-remote.apk
 !apps/web/public/downloads/streamdesk.apk
+# Electron Mac builds are ~120MB — published via GitHub Releases, not git
 apps/web/public/downloads/StreamDesk-mac.zip
-!apps/web/public/downloads/StreamDesk-mac.zip
+apps/web/public/downloads/StreamDesk.dmg
+apps/web/public/downloads/StreamDesk.dmg.blockmap
 .streamdesk-mac-stage
+apps/streamdesk-desk/electron-dist
+apps/streamdesk-desk/release

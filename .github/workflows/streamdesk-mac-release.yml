@@ -1,0 +1,45 @@
+name: StreamDesk Mac release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "streamdesk-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Package StreamDesk.app
+        run: node scripts/package-streamdesk-mac.mjs
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('streamdesk-v0.1.{0}', github.run_number) }}
+          name: StreamDesk for Mac ${{ github.ref_type == 'tag' && github.ref_name || format('0.1.{0}', github.run_number) }}
+          generate_release_notes: true
+          make_latest: true
+          files: |
+            apps/web/public/downloads/StreamDesk.dmg
+            apps/web/public/downloads/StreamDesk-mac.zip
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

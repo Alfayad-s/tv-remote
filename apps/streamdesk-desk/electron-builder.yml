@@ -1,0 +1,40 @@
+appId: com.streamdesk.desk
+productName: StreamDesk
+copyright: Copyright © StreamDesk
+directories:
+  output: release
+files:
+  - electron-dist/**/*
+extraMetadata:
+  main: electron-dist/main.cjs
+  type: commonjs
+extraResources:
+  - from: electron-dist/desk.html
+    to: desk.html
+asar: true
+mac:
+  category: public.app-category.utilities
+  target:
+    - target: dmg
+      arch:
+        - arm64
+    - target: zip
+      arch:
+        - arm64
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  extendInfo:
+    LSUIElement: true
+    NSAppleEventsUsageDescription: StreamDesk needs Automation to open, switch, and quit Mac apps from your phone.
+dmg:
+  title: StreamDesk
+  contents:
+    - x: 140
+      y: 200
+    - x: 420
+      y: 200
+      type: link
+      path: /Applications
+artifactName: ${productName}.${ext}
+electronVersion: 37.2.6

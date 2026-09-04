@@ -54,6 +54,23 @@
           "value": "no-store"
         }
       ]
+    },
+    {
+      "source": "/downloads/StreamDesk.dmg",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/x-apple-diskimage"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"StreamDesk.dmg\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
     }
   ],
   "rewrites": [{ "source": "/((?!downloads/).*)", "destination": "/index.html" }]

@@ -1,60 +1,89 @@
+#!/usr/bin/env node
 import { build } from "esbuild";
-import {
-  chmodSync,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const outDir = join(root, "apps/web/public/downloads");
-const stage = join(root, ".streamdesk-mac-stage");
-const zipPath = join(outDir, "StreamDesk-mac.zip");
+const desk = join(root, "apps/streamdesk-desk");
+const outDir = join(desk, "electron-dist");
+const releaseDir = join(desk, "release");
+const downloads = join(root, "apps/web/public/downloads");
+const zipOut = join(downloads, "StreamDesk-mac.zip");
+const dmgOut = join(downloads, "StreamDesk.dmg");
 
+rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
-rmSync(stage, { recursive: true, force: true });
-mkdirSync(stage, { recursive: true });
+mkdirSync(downloads, { recursive: true });
 
+console.log("Bundling StreamDesk Electron main…");
 await build({
-  entryPoints: [join(root, "apps/streamdesk-desk/src/index.ts")],
+  entryPoints: [join(desk, "electron/main.ts")],
   bundle: true,
   platform: "node",
-  format: "esm",
+  format: "cjs",
   target: "node22",
-  outfile: join(stage, "desk.mjs"),
-  banner: {
-    js: "import { createRequire as __streamdeskCreateRequire } from 'module'; const require = __streamdeskCreateRequire(import.meta.url);",
-  },
+  outfile: join(outDir, "main.cjs"),
+  external: ["electron"],
   packages: "bundle",
+  banner: {
+    js: "var __streamdeskImportMetaUrl=require('url').pathToFileURL(__filename).href;",
+  },
+  define: {
+    "import.meta.url": "__streamdeskImportMetaUrl",
+  },
 });
 
-copyFileSync(join(root, "apps/streamdesk-desk/src/desk.html"), join(stage, "desk.html"));
-copyFileSync(join(root, "scripts/streamdesk-mac-launcher.command"), join(stage, "Start StreamDesk Desk.command"));
-chmodSync(join(stage, "Start StreamDesk Desk.command"), 0o755);
+copyFileSync(join(desk, "src/desk.html"), join(outDir, "desk.html"));
 
-writeFileSync(
-  join(stage, "README.txt"),
-  `StreamDesk Desk (macOS)
-=======================
+function run(command, args, cwd) {
+  const result = spawnSync(command, args, {
+    cwd,
+    stdio: "inherit",
+    shell: false,
+    env: { ...process.env },
+  });
+  if (result.status !== 0) {
+    throw new Error(`${command} ${args.join(" ")} failed`);
+  }
+}
 
-1. Install Node.js 22+ from https://nodejs.org if you do not have it.
-2. Double-click "Start StreamDesk Desk.command".
-3. Open http://localhost:8790/ in Safari/Chrome to arrange apps + icons.
-4. On your phone, open the StreamDesk app (or website remote), enter this Mac's IP and the PIN.
-
-The desk agent listens on port 8790 on your Wi-Fi.
-`,
-  "utf8",
+console.log("Packaging unsigned StreamDesk.app (dmg + zip)…");
+rmSync(releaseDir, { recursive: true, force: true });
+run(
+  "npx",
+  [
+    "electron-builder",
+    "--mac",
+    "dmg",
+    "zip",
+    "--arm64",
+    "--config",
+    join(desk, "electron-builder.yml"),
+  ],
+  desk,
 );
 
-if (existsSync(zipPath)) {
-  rmSync(zipPath);
+if (!existsSync(releaseDir)) {
+  throw new Error(`electron-builder released nothing at ${releaseDir}`);
 }
-execFileSync("zip", ["-r", zipPath, "."], { cwd: stage });
-rmSync(stage, { recursive: true, force: true });
-console.log(`Wrote ${zipPath}`);
+
+const artifacts = readdirSync(releaseDir);
+const zipArtifact = artifacts.find((name) => name.endsWith(".zip"));
+const dmgArtifact = artifacts.find((name) => name.endsWith(".dmg"));
+
+if (!zipArtifact && !dmgArtifact) {
+  throw new Error(`No mac artifacts in ${releaseDir}: ${artifacts.join(", ")}`);
+}
+
+if (zipArtifact) {
+  copyFileSync(join(releaseDir, zipArtifact), zipOut);
+  console.log(`Wrote ${zipOut}`);
+}
+if (dmgArtifact) {
+  copyFileSync(join(releaseDir, dmgArtifact), dmgOut);
+  console.log(`Wrote ${dmgOut}`);
+}
+
+console.log("StreamDesk Mac Electron package ready.");

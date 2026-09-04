@@ -2,7 +2,8 @@ import { Download } from "lucide-react";
 import { SiteNav } from "./SiteNav.js";
 
 const STREAMDESK_APK = "/downloads/streamdesk.apk";
-const STREAMDESK_MAC = "/downloads/StreamDesk-mac.zip";
+const STREAMDESK_MAC =
+  "https://github.com/Alfayad-s/tv-remote/releases/latest/download/StreamDesk.dmg";
 
 export function StreamDeskPage({ onGo }: { onGo: (path: string) => void }) {
   return (
@@ -31,16 +32,15 @@ export function StreamDeskPage({ onGo }: { onGo: (path: string) => void }) {
 
         <a
           href={STREAMDESK_MAC}
-          download="StreamDesk-mac.zip"
           className="brutal-press flex min-h-14 items-center justify-center gap-2 border-[4px] border-ink bg-accent-strong px-5 text-base font-bold uppercase tracking-wide text-ink shadow-[5px_5px_0_#111]"
         >
           <Download className="size-5" strokeWidth={2} aria-hidden="true" />
           Download for Mac
         </a>
         <p className="text-sm leading-6">
-          Unzip, double-click <span className="font-mono">Start StreamDesk Desk.command</span>, then
-          open <span className="font-mono">http://localhost:8790/</span> to arrange apps. Needs Node.js
-          22+.
+          Open the disk image and drag <span className="font-mono">StreamDesk</span> into Applications.
+          Launch it — look for <span className="font-mono">SD</span> in the menu bar for your PIN. If macOS
+          blocks the unsigned build, right-click the app → Open → Open.
         </p>
 
         <a
@@ -61,12 +61,12 @@ export function StreamDeskPage({ onGo }: { onGo: (path: string) => void }) {
         <h2 className="font-display text-2xl uppercase leading-none">How it works</h2>
         <ol className="mt-4 flex flex-col gap-3 text-sm leading-6">
           <li className="border-4 border-ink bg-paper px-4 py-3 shadow-[4px_4px_0_#111]">
-            <strong>1.</strong> Start StreamDesk Desk on the Mac. Note the 6-digit PIN.
+            <strong>1.</strong> Open StreamDesk on the Mac. Click <span className="font-mono">SD</span> in
+            the menu bar and note the 6-digit PIN.
           </li>
           <li className="border-4 border-ink bg-paper px-4 py-3 shadow-[4px_4px_0_#111]">
-            <strong>2.</strong> On the Mac, open{" "}
-            <span className="font-mono">http://localhost:8790/</span> to add apps with icons and
-            drag them into order.
+            <strong>2.</strong> Choose <strong>Arrange Apps…</strong> from the menu to add apps with icons
+            and drag them into order.
           </li>
           <li className="border-4 border-ink bg-paper px-4 py-3 shadow-[4px_4px_0_#111]">
             <strong>3.</strong> On your phone, enter the Mac IP and PIN — the desk list appears with

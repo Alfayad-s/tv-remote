@@ -29,7 +29,7 @@ function findCachedGradle(): string | null {
   return null;
 }
 
-console.log("Packaging StreamDesk Mac zip…");
+console.log("Packaging StreamDesk Mac Electron app…");
 run("node", [join(root, "scripts/package-streamdesk-mac.mjs")], root);
 
 console.log("Building StreamDesk web + syncing Android…");
@@ -53,8 +53,9 @@ if (!existsSync(apkFrom)) {
 copyFileSync(apkFrom, apkTo);
 console.log(`Copied streamdesk.apk → ${apkTo}`);
 
+const dmg = join(downloads, "StreamDesk.dmg");
 const zip = join(downloads, "StreamDesk-mac.zip");
-if (!existsSync(zip)) {
-  throw new Error(`Mac zip missing at ${zip}`);
+if (!existsSync(dmg) && !existsSync(zip)) {
+  throw new Error(`Mac download missing (expected StreamDesk.dmg or StreamDesk-mac.zip)`);
 }
 console.log("StreamDesk downloads ready.");

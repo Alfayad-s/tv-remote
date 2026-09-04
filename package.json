@@ -24,10 +24,12 @@
     "android": "npm run cap:sync -w @tv-remote/web && npm run cap:open -w @tv-remote/web",
     "android:sync": "npm run cap:sync -w @tv-remote/web",
     "apk:web": "node scripts/copy-apk-to-web.mjs",
-    "streamdesk:desk": "npm run dev -w @tv-remote/streamdesk-desk",
+    "streamdesk:desk": "npm run electron:dev -w @tv-remote/streamdesk-desk",
+    "streamdesk:desk:cli": "npm run dev -w @tv-remote/streamdesk-desk",
     "streamdesk:mobile": "npm run dev -w @tv-remote/streamdesk",
     "streamdesk:dev": "concurrently -n desk,mobile -c green,magenta \"npm run streamdesk:desk\" \"npm run streamdesk:mobile\"",
-    "streamdesk:package": "node scripts/package-streamdesk-downloads.mjs"
+    "streamdesk:package": "node scripts/package-streamdesk-downloads.mjs",
+    "streamdesk:package:mac": "node scripts/package-streamdesk-mac.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -44,5 +46,10 @@
   "engines": {
     "node": ">=22.0.0",
     "npm": ">=10.0.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true,
+    "electron@37.10.3": true
   }
 }
