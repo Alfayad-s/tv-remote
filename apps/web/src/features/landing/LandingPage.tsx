@@ -104,12 +104,22 @@ export function LandingPage({ onGo }: { onGo: (path: string) => void }) {
         <p className="mt-3 text-center font-mono text-[11px] font-bold uppercase tracking-wide">
           Android APK. Allow install from this browser if the phone asks.
         </p>
+      </section>
+
+      <section className="border-b-[5px] border-ink bg-blue px-5 py-6 text-paper">
+        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-paper/70">
+          Also from this site
+        </p>
+        <h2 className="mt-2 font-display text-2xl uppercase leading-none">StreamDesk</h2>
+        <p className="mt-3 max-w-[24rem] text-sm font-medium leading-6 text-paper/90">
+          Menu-bar Mac app + phone remote. Open, close, and switch Mac apps over the same Wi‑Fi.
+        </p>
         <button
           type="button"
-          className="brutal-press mt-4 min-h-12 w-full border-[4px] border-ink bg-paper px-5 text-sm font-bold uppercase tracking-wide shadow-[5px_5px_0_#111]"
+          className="brutal-press mt-5 min-h-12 w-full border-[4px] border-ink bg-accent-strong px-5 text-sm font-bold uppercase tracking-wide text-ink shadow-[5px_5px_0_#111]"
           onClick={() => onGo("/streamdesk")}
         >
-          Also see StreamDesk →
+          StreamDesk downloads →
         </button>
       </section>
 

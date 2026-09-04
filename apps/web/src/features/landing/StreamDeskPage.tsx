@@ -2,8 +2,10 @@ import { Download } from "lucide-react";
 import { SiteNav } from "./SiteNav.js";
 
 const STREAMDESK_APK = "/downloads/streamdesk.apk";
-const STREAMDESK_MAC =
+const STREAMDESK_MAC_DMG =
   "https://github.com/Alfayad-s/tv-remote/releases/latest/download/StreamDesk.dmg";
+const STREAMDESK_MAC_ZIP =
+  "https://github.com/Alfayad-s/tv-remote/releases/latest/download/StreamDesk-mac.zip";
 
 export function StreamDeskPage({ onGo }: { onGo: (path: string) => void }) {
   return (
@@ -12,7 +14,7 @@ export function StreamDeskPage({ onGo }: { onGo: (path: string) => void }) {
 
       <section className="border-y-[5px] border-ink bg-blue px-5 pb-7 pt-6 text-paper">
         <p className="inline-block border-4 border-paper bg-ink px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.2em]">
-          Mac + phone
+          Mac menu bar + phone
         </p>
         <h1 className="mt-4 font-display text-[clamp(2.35rem,12vw,3.15rem)] uppercase leading-[0.88] tracking-tight">
           Stream
@@ -31,7 +33,7 @@ export function StreamDeskPage({ onGo }: { onGo: (path: string) => void }) {
         </p>
 
         <a
-          href={STREAMDESK_MAC}
+          href={STREAMDESK_MAC_DMG}
           className="brutal-press flex min-h-14 items-center justify-center gap-2 border-[4px] border-ink bg-accent-strong px-5 text-base font-bold uppercase tracking-wide text-ink shadow-[5px_5px_0_#111]"
         >
           <Download className="size-5" strokeWidth={2} aria-hidden="true" />
@@ -40,7 +42,11 @@ export function StreamDeskPage({ onGo }: { onGo: (path: string) => void }) {
         <p className="text-sm leading-6">
           Open the disk image and drag <span className="font-mono">StreamDesk</span> into Applications.
           Launch it — look for <span className="font-mono">SD</span> in the menu bar for your PIN. If macOS
-          blocks the unsigned build, right-click the app → Open → Open.
+          blocks the unsigned build, right-click the app → Open → Open. Prefer a zip?{" "}
+          <a className="font-bold underline underline-offset-2" href={STREAMDESK_MAC_ZIP}>
+            StreamDesk-mac.zip
+          </a>
+          .
         </p>
 
         <a
