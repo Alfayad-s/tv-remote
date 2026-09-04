@@ -2,7 +2,7 @@ export function SiteNav({
   current,
   onGo,
 }: {
-  current: "home" | "contact";
+  current: "home" | "contact" | "streamdesk";
   onGo: (path: string) => void;
 }) {
   const linkClass = (active: boolean): string =>
@@ -11,9 +11,16 @@ export function SiteNav({
     }`;
 
   return (
-    <nav className="flex items-center justify-between gap-3 px-5 py-4" aria-label="Site">
+    <nav className="flex flex-wrap items-center justify-between gap-3 px-5 py-4" aria-label="Site">
       <button type="button" className={linkClass(current === "home")} onClick={() => onGo("/")}>
         Home
+      </button>
+      <button
+        type="button"
+        className={linkClass(current === "streamdesk")}
+        onClick={() => onGo("/streamdesk")}
+      >
+        StreamDesk
       </button>
       <button
         type="button"

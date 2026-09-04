@@ -5,7 +5,7 @@
   "outputDirectory": "apps/web/dist",
   "headers": [
     {
-      "source": "/downloads/(.*).apk",
+      "source": "/downloads/iffalcon-remote.apk",
       "headers": [
         {
           "key": "Content-Type",
@@ -14,6 +14,40 @@
         {
           "key": "Content-Disposition",
           "value": "attachment; filename=\"iffalcon-remote.apk\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/downloads/streamdesk.apk",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.android.package-archive"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"streamdesk.apk\""
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/downloads/StreamDesk-mac.zip",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/zip"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"StreamDesk-mac.zip\""
         },
         {
           "key": "Cache-Control",

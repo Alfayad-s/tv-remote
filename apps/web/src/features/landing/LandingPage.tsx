@@ -104,6 +104,13 @@ export function LandingPage({ onGo }: { onGo: (path: string) => void }) {
         <p className="mt-3 text-center font-mono text-[11px] font-bold uppercase tracking-wide">
           Android APK. Allow install from this browser if the phone asks.
         </p>
+        <button
+          type="button"
+          className="brutal-press mt-4 min-h-12 w-full border-[4px] border-ink bg-paper px-5 text-sm font-bold uppercase tracking-wide shadow-[5px_5px_0_#111]"
+          onClick={() => onGo("/streamdesk")}
+        >
+          Also see StreamDesk →
+        </button>
       </section>
 
       <section className="px-5 py-6">

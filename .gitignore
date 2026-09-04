@@ -16,3 +16,7 @@ apps/server/data/
 .eslintcache
 apps/web/public/downloads/*.apk
 !apps/web/public/downloads/iffalcon-remote.apk
+!apps/web/public/downloads/streamdesk.apk
+apps/web/public/downloads/StreamDesk-mac.zip
+!apps/web/public/downloads/StreamDesk-mac.zip
+.streamdesk-mac-stage

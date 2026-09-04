@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "./components/AppShell.js";
 import { ContactPage } from "./features/landing/ContactPage.js";
 import { LandingPage } from "./features/landing/LandingPage.js";
+import { StreamDeskPage } from "./features/landing/StreamDeskPage.js";
 import { RemoteScreen } from "./features/remote/RemoteScreen.js";
 import { SpeakerScreen } from "./features/speaker/SpeakerScreen.js";
 import { isNativeAndroid } from "./native/platform.js";
@@ -13,6 +14,10 @@ function isRemotePath(pathname: string): boolean {
 
 function isContactPath(pathname: string): boolean {
   return pathname === "/contact" || pathname.startsWith("/contact/");
+}
+
+function isStreamDeskPath(pathname: string): boolean {
+  return pathname === "/streamdesk" || pathname.startsWith("/streamdesk/");
 }
 
 export default function App() {
@@ -59,7 +64,13 @@ export default function App() {
 
   return (
     <AppShell scroll>
-      {isContactPath(path) ? <ContactPage onGo={go} /> : <LandingPage onGo={go} />}
+      {isContactPath(path) ? (
+        <ContactPage onGo={go} />
+      ) : isStreamDeskPath(path) ? (
+        <StreamDeskPage onGo={go} />
+      ) : (
+        <LandingPage onGo={go} />
+      )}
     </AppShell>
   );
 }
